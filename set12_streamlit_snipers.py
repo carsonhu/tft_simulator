@@ -27,8 +27,11 @@ class Simulator(object):
             champion.addStats(item)
         for item in items:
             item.ability("preCombat", 0, champion)
+        for item in items:
+            item.ability("postPreCombat", 0, champion)
     def simulate(self, items, buffs, champion, opponents, duration):
         # there's no real distinction between items and buffs
+        # dmgVector: (Time, Damage Dealt, current AS, current Mana)
         items = items + buffs + champion.items
         champion.items = items
         champion.opponents = opponents
@@ -343,11 +346,20 @@ def doExperimentOneExtra(champion, opponent, itemList, buffList, t):
     simulator = Simulator()
     simList = []
 
-    for item in itemList + buffList:
+    for item in itemList:
       champ = copy.deepcopy(champion)
       results = simulator.simulate([copy.deepcopy(item)], [], champ,
         [copy.deepcopy(opponent) for i in range(8)], t)
       simList.append({"Champ": champ, "Extra": item, "Results": results})
+    for buff in buffList:
+      champ = copy.deepcopy(champion)
+      equal_buffs = [champ_buff for champ_buff in champ.items if champ_buff.name.split(" ")[0] == buff.name.split(" ")[0]] 
+      for equal_buff in equal_buffs:
+        champ.items.remove(equal_buff)
+      print(champ.items)
+      results = simulator.simulate([], [copy.deepcopy(buff)], champ,
+                                   [copy.deepcopy(opponent) for i in range(8)], t)
+      simList.append({"Champ": champ, "Extra": buff, "Results": results})
 
     return simList
 
@@ -470,6 +482,7 @@ def createSelectorDPSTable(simLists):
 
 
   df = pd.DataFrame(entries)
+  df = df.sort_values(by=['Extra DPS (25s)'], ascending=False)
   return df
 
 

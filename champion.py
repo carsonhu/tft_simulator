@@ -92,6 +92,7 @@ class Champion(object):
 
         # currently unused
         self.armorPierce = Stat(0, 1, 0)
+
         self.canCrit = True
         self.canSpellCrit = False
         self.manalockTime = -1  # time until unmanalocked
@@ -104,6 +105,8 @@ class Champion(object):
         self.dmgVector = []
         self.alive = True
         # self.ie = False # calculations for IE
+
+        self.first_takedown = 5 # time of first takedown
 
         self.numAttacks = 0
         self.numCasts = 0
@@ -216,7 +219,7 @@ class Champion(object):
             self.curMana = self.curMana - self.fullMana.stat + self.startingMana
             # basically, can't attack before cast time up.
             # this logic might be slightly incorrect
-            self.nextAttackTime = max(time + self.attackTime(),
+            self.nextAttackTime = max(self.nextAttackTime,
                                       time + self.castTime)    
             for item in items:
                 item.ability("postAbility", time, self)
@@ -264,7 +267,7 @@ class Champion(object):
         avgDmg = (dmg[0] * (1 - critChance) + critDmg[0] * critChance, dmg[1])
         if avgDmg:
             # record (Time, Damage Dealt, current AS, current Mana)
-            self.dmgVector.append((time,avgDmg, self.aspd.stat, self.curMana))
+            self.dmgVector.append((time, avgDmg, self.aspd.stat, self.curMana))
 
     def multiTargetAttack(self, opponents, items, time, targets, scaling, type='physical', numAttacks=1):        
         # for item in items:
@@ -317,11 +320,10 @@ class Champion(object):
     def multiTargetSpell(self, opponents, items, time, targets, scaling, type='magical', numAttacks=0):
         baseDmg = scaling(self.level, self.atk.stat, self.ap.stat)
         baseCritDmg = baseDmg
-        if type == 'physical':
-            for attacks in range(numAttacks):
-                # activate onhits, currently unused
-                for item in items:
-                    item.ability("onAttack", time, self, opponents[0])
+        for attacks in range(numAttacks):
+            # activate onhits, currently unused
+            for item in items:
+                item.ability("onAttack", time, self, opponents[0])
         if self.canSpellCrit:
             baseCritDmg *= self.critDamage()
         baseDmg *= self.dmgMultiplier.stat

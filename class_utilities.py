@@ -14,7 +14,7 @@ import numpy as np
 import itertools
 import utils
 
-def buff_bar(buff_list, num_buffs=1,max_buffs=4, default_item='NoBuff'):
+def buff_bar(buff_list, num_buffs=1, max_buffs=4, starting_buffs=[], default_item='NoBuff'):
     """Buff Bar: Code for displaying the Buffs input list:
     Each Buff has a name and a level.
     
@@ -28,22 +28,27 @@ def buff_bar(buff_list, num_buffs=1,max_buffs=4, default_item='NoBuff'):
     st.header("Global Buffs")
     item_cols = st.columns([3, 1])
     num_buffs = st.slider('Number of Buffs',
-    min_value=1, max_value=max_buffs, value=num_buffs)
-
-    index = 0
-    if default_item in buff_list:
-      index = buff_list.index(default_item)
-
+    min_value=1, max_value=max_buffs, value=max(num_buffs, len(starting_buffs)))
     buffs = []
+
+    
+
+    
     for n in range(num_buffs):
+        index = 0
+        if default_item in buff_list:
+            index = buff_list.index(default_item)
         with item_cols[0]:
-          buff1 = st.selectbox(
-          'Buff {}'.format(n+1),
-           buff_list, key="Buff {}".format(n), index=index)
+            if n < len(starting_buffs):
+                if starting_buffs[n] in buff_list:
+                    index = buff_list.index(starting_buffs[n])
+            buff1 = st.selectbox(
+            'Buff {}'.format(n+1),
+             buff_list, key="Buff {}".format(n), index=index)
         with item_cols[1]:
-          buff1level = st.selectbox(
-          'Level',
-           utils.class_for_name('set12buffs', buff1).levels, key="Buff lvl {}".format(n))
+            buff1level = st.selectbox(
+            'Level',
+             utils.class_for_name('set12buffs', buff1).levels, key="Buff lvl {}".format(n))
         buffs.append((buff1, buff1level))
     return buffs
 
@@ -70,24 +75,28 @@ def plot_df(df, simLists):
         new_entry = {}
         dmgList = pd.DataFrame([[damageInstance[0],
                                  damageInstance[1][0],
-                                 damageInstance[1][1]]
+                                 damageInstance[1][1],
+                                 damageInstance[2],
+                                 damageInstance[3]]
                                 for damageInstance in
                                 simLists[index]["Results"]])
-        dmgList.columns = ["Time", "Damage", "Type"]
-        dmgList["Total Dmg"] = dmgList["Damage"].cumsum()
-        dmgList = dmgList[['Time', 'Damage', 'Total Dmg', 'Type']]
+        dmgList.columns = ["Time", "Dmg", "Type", "AS", "Mana"]
+        dmgList["Total Dmg"] = dmgList["Dmg"].cumsum()
+        dmgList = dmgList[['Time', 'Dmg', 'Total Dmg', 'Type', 'AS', 'Mana']]
 
-        new_entry['Damage'] = dmgList
+        new_entry['Dmg'] = dmgList
 
         rounded_list = dmgList.round(2)
 
         # st.write(simLists[to_plot])
 
         champ_name = simLists[index]["Champ"].name
-        champ_level = simLists[index]["Champ"].level
+        # champ_level = simLists[index]["Champ"].level
+        champ_item = simLists[index]["Extra"].name
 
         new_entry['Name'] = champ_name
-        new_entry['Level'] = champ_level
+        # new_entry['Level'] = champ_level
+        new_entry['Item'] = champ_item
         dmg_dict[index] = new_entry
 
       # label
@@ -95,7 +104,7 @@ def plot_df(df, simLists):
     col1, col2 = st.columns([2, 1])
 
     plot_labels = {key: '{}: {} {}'.format(key, value['Name'],
-                                           value['Level']) for key, value in dmg_dict.items()}
+                                           value['Item']) for key, value in dmg_dict.items()}
 
     if len(dmg_dict) > 0:
         with col1:
@@ -106,12 +115,12 @@ def plot_df(df, simLists):
         with col2:
             index = st.selectbox('Index Log', list(dmg_dict.keys()),
                                  format_func=lambda x: plot_labels[x])
-            st.dataframe(dmg_dict[index]['Damage'].round(2))
+            st.dataframe(dmg_dict[index]['Dmg'].round(2))
 
     for key, value in dmg_dict.items():
         with col1:
-            ax.plot(value['Damage']['Time'],
-                    value['Damage']['Total Dmg'],
+            ax.plot(value['Dmg']['Time'],
+                    value['Dmg']['Total Dmg'],
                     label=plot_labels[key])
             ax.legend()
 
@@ -174,6 +183,22 @@ def enemy_list(key):
   enemy.mr.base = mr
   return enemy
 
+def first_takedown(key, champ):
+    """Enemy list: Configure the base stats of the enemy: HP, Armor, and MR
+    
+    Args:
+        key (string): unique key for streamlit
+    
+    Returns:
+        Champion: a champion with the requested hp, armor, and mr
+    """
+
+    st.header("First takedown")
+    first_takedown = st.number_input('Time of first takedown',
+                                     min_value=1, max_value=30,
+                                     value=5, key=key)
+    champ.first_takedown = first_takedown
+
 def add_items(champ, buffs, add_noitem=False):
   if item != 'NoItem' or add_noitem:
     champ.items.append(utils.class_for_name('set12items', item)())
@@ -205,6 +230,6 @@ def champ_selector(champ_list):
   with item_cols[1]:
     champlevel = st.selectbox(
     'Level',
-     [1, 2, 3])
+     [1, 2, 3], index=1)
   return utils.class_for_name('set12champs', champ)(champlevel)
 

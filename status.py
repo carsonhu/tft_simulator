@@ -57,8 +57,8 @@ class VarusBolts(Status):
         return True
 
 class UltActivator(Status):
-    def __init__(self, wearoff_time):
-        super().__init__("Ult Active", wearoff_time=wearoff_time)
+    def __init__(self, name):
+        super().__init__("Ult Active {}".format(name))
     def applicationEffect(self, champion, time, duration, params):
         champion.ultActive = True
         return True
@@ -125,8 +125,6 @@ class  AsheUlt(Status):
         # self.addition = params
         return True
     def wearoffEffect(self, champion, time):
-        print(time)
-        print("wearing off")
         champion.ultsActive -= 1
         return True
 

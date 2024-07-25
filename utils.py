@@ -25,4 +25,10 @@ def convertStrList(module_name, str_list):
         item_list.append(class_for_name(module_name, item)())
     return item_list
 
+def convertBuffList(module_name, str_list):
+    item_list = []
+    for item in str_list:
+        for level in class_for_name(module_name, item).levels:
+            item_list.append(class_for_name(module_name, item)(level))
+    return item_list
     

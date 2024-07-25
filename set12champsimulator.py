@@ -21,6 +21,8 @@ class Simulator(object):
             champion.addStats(item)
         for item in items:
             item.ability("preCombat", 0, champion)
+        for item in items:
+            item.ability("postPreCombat", 0, champion)
     def simulate(self, items, buffs, champion, opponents, duration):
         # there's no real distinction between items and buffs
         items = items + buffs + champion.items

@@ -231,7 +231,7 @@ class JG(Item):
 
 class Red(Item):
     def __init__(self):
-        super().__init__("Red", aspd=40, phases=["preCombat"])
+        super().__init__("Red (no burn yet)", aspd=40, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.add += .06
@@ -284,12 +284,18 @@ class Bramble(Item):
 
 class Blue(Item):
     def __init__(self):
-        super().__init__("Blue Buff", mana=20, ap=20, ad=20, has_radiant=True, phases="preCombat")
+        super().__init__("Blue Buff", mana=20, ap=20, ad=20, has_radiant=True, phases=["preCombat", "onUpdate"])
+        self.has_activated = False
 
     def performAbility(self, phase, time, champion, input_=0):
         # blue buff is the only multiplier so we just to flat -10
-        champion.fullMana.add = -10
-        champion.dmgMultiplier.add += .08 # we actually want this only after 5s or so
+        if phase == "preCombat":
+            champion.fullMana.add = -10
+
+        if phase == "onUpdate":
+            if time > champion.first_takedown and not self.has_activated:
+                champion.dmgMultiplier.add += .08 # we actually want this only after 5s or so
+                self.has_activated = True
         return 0
 
 ### ARTIFACTS
@@ -403,12 +409,19 @@ class RadiantShiv(Item):
 
 class RadiantBlue(Item):
     def __init__(self):
-        super().__init__("Radiant Blue", mana=60, ap=60, ad=60, phases="preCombat")
+        super().__init__("Radiant Blue", mana=60, ap=60, ad=60, phases=["preCombat", "onUpdate"])
+        self.has_activated = False
+        
 
     def performAbility(self, phase, time, champion, input_=0):
         # blue buff is the only multiplier so we just to flat -10
-        champion.fullMana.add = -10
-        champion.dmgMultiplier.add += .2 # we actually want this only after 5s or so
+        if phase == "preCombat":
+            champion.fullMana.add = -10
+
+        if phase == "onUpdate":
+            if time > champion.first_takedown and not self.has_activated:
+                champion.dmgMultiplier.add += .2 # we actually want this only after 5s or so
+                self.has_activated = True
         return 0
 
 class RadiantArchangels(Item):

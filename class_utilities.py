@@ -141,19 +141,17 @@ def items_list(items, default_item='NoItem'):
   if default_item in items:
     index = items.index(default_item)
 
-  col1, col2, col3 = st.columns(3)
-  with col1:
-    item1 = st.selectbox(
-    'Item 1',
-     items, index=index)
-  with col2:
-    item2 = st.selectbox(
-    'Item 2',
-     items, index=index)
-  with col3:
-    item3 = st.selectbox(
-    'Item 3',
-     items, index=index)
+  #col1, col2, col3 = st.columns(3)
+
+  item1 = st.selectbox(
+  'Item 1',
+   items, index=index)
+  item2 = st.selectbox(
+  'Item 2',
+   items, index=index)
+  item3 = st.selectbox(
+  'Item 3',
+   items, index=index)
   return item1, item2, item3
 
 def enemy_list(key):

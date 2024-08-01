@@ -341,6 +341,10 @@ def doExperimentGivenItems(champions, opponent, itemCombo, buffs, t):
     return simList
     # return simList  
 
+def radiantRefactor(champions, opponent, itemList, t):
+    # to get the radiants
+    return 0
+
 def doExperimentOneExtra(champion, opponent, itemList, buffList, t):
     # this is done with champ already with a set of items
     simulator = Simulator()
@@ -471,7 +475,6 @@ def createSelectorDPSTable(simLists):
       noitem_key = (entry['Name'], entry['Level'], 'NoItem')
       nobuff_key = (entry['Name'], entry['Level'], 'NoItem')
       item_key = (entry['Name'], entry['Level'], entry['Extra'])
-      print(noitem_key)
       entry['Extra DPS (25s)'] = 0
       if item_key in dpsDict and noitem_key in dpsDict:
         entry['Extra DPS (25s)'] = round(dpsDict[item_key] / dpsDict[noitem_key] \

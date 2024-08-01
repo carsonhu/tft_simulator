@@ -6,18 +6,21 @@ offensive_craftables = ['Rab', 'BT', 'Gunblade', 'Rageblade',
                         'Archangels', 'HoJ', 'Guardbreaker', 'IE', 'LW',
                         'Shojin', 'Titans', 'GS', 'GSNoGiant', 'Nashors',
                         'Adaptive', 'RH', 'DB', 'QSS', 'JG', 'Red', 'Shiv',
-                        'Blue']
+                        'Blue', 'Morellos']
 
 artifacts = ['InfinityForce', 'Fishbones', 'RFC', 'Mittens', 'GamblersBlade',
              'WitsEndStage2', 'WitsEndStage3', 'WitsEndStage4',
-             'WitsEndStage5', 'WitsEndStage6']
+             'WitsEndStage5', 'WitsEndStage6', 'LichBaneStage2',
+             'LichBaneStage3', 'LichBaneStage4', 'LichBaneStage5',
+             'LichBaneStage6'
+             ]
 
 radiants = ['RadiantGuardbreaker', 'RadiantShiv', 'RadiantBlue',
             'RadiantArchangels', 'RadiantRH', 'RadiantRageblade',
             'RadiantLW', 'RadiantGS', 'RadiantRab', 'RadiantJG',
             'RadiantNashors', 'RadiantShojin', 'RadiantIE',
             'RadiantDB', 'RadiantAdaptive', 'RadiantTitans',
-            'RadiantHoJ']
+            'RadiantHoJ', 'RadiantRed', 'RadiantMorellos']
 
 no_item = ['NoItem']
 
@@ -61,7 +64,7 @@ class Rab(Item):
 
 class BT(Item):
     def __init__(self):
-        super().__init__("Bloodthirster", ad=20, ap=15, phases=None)
+        super().__init__("Bloodthirster", ad=20, ap=20, phases=None)
 
 class Gunblade(Item):
     def __init__(self):
@@ -238,6 +241,13 @@ class Red(Item):
         # champion.critDmg.add += 0.1
         return 0
 
+class Morellos(Item):
+    def __init__(self):
+        super().__init__("Morellos (no burn yet)", aspd=10, ap=25, phases=None)
+
+    def performAbility(self, phase, time, champion, input_=0):
+        return 0
+
 class Shiv(Item):
     def __init__(self):
         super().__init__("Statikk Shiv", ap=15, aspd=20, mana=15, has_radiant=True, phases=["preAttack"])
@@ -291,6 +301,7 @@ class Blue(Item):
         # blue buff is the only multiplier so we just to flat -10
         if phase == "preCombat":
             champion.fullMana.add = -10
+            champion.curMana = min(champion.curMana, champion.fullMana.stat)
 
         if phase == "onUpdate":
             if time > champion.first_takedown and not self.has_activated:
@@ -331,6 +342,81 @@ class GamblersBlade(Item):
 
     def performAbility(self, phase, time, champion, input_):
         return 0
+
+class LichBaneStage2(Item):
+    def __init__(self):
+        super().__init__("Lich Bane (Stage 2)", ap=30, mana=15, phases=["preAbility", "preAttack"])
+        self.enhancedAuto = False
+
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preAbility":
+            self.enhancedAuto = True
+        elif phase == "preAttack":
+            if self.enhancedAuto:
+                champion.doDamage(champion.opponents[0], [], 0, 200,
+                                  200, 'magical', time)
+        return 0    
+
+class LichBaneStage3(Item):
+    def __init__(self):
+        super().__init__("Lich Bane (Stage 3)", ap=30, mana=15, phases=["preAbility", "preAttack"])
+        self.enhancedAuto = False
+
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preAbility":
+            self.enhancedAuto = True
+        elif phase == "preAttack":
+            if self.enhancedAuto:
+                champion.doDamage(champion.opponents[0], [], 0, 270,
+                                  270, 'magical', time)
+        return 0    
+
+class LichBaneStage4(Item):
+    def __init__(self):
+        super().__init__("Lich Bane (Stage 4)", ap=30, mana=15, phases=["preAbility", "preAttack"])
+        self.enhancedAuto = False
+
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preAbility":
+            self.enhancedAuto = True
+        elif phase == "preAttack":
+            if self.enhancedAuto:
+                champion.doDamage(champion.opponents[0], [], 0, 340,
+                                  340, 'magical', time)
+        return 0    
+
+class LichBaneStage5(Item):
+    def __init__(self):
+        super().__init__("Lich Bane (Stage 5)", ap=30, mana=15, phases=["preAbility", "preAttack"])
+        self.enhancedAuto = False
+
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preAbility":
+            self.enhancedAuto = True
+        elif phase == "preAttack":
+            if self.enhancedAuto:
+                champion.doDamage(champion.opponents[0], [], 0, 410,
+                                  410, 'magical', time)
+        return 0    
+
+class LichBaneStage6(Item):
+    def __init__(self):
+        super().__init__("Lich Bane (Stage 6)", ap=30, mana=15, phases=["preAbility", "preAttack"])
+        self.enhancedAuto = False
+
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preAbility":
+            self.enhancedAuto = True
+        elif phase == "preAttack":
+            if self.enhancedAuto:
+                champion.doDamage(champion.opponents[0], [], 0, 480,
+                                  480, 'magical', time)
+        return 0    
 
 class WitsEndStage2(Item):
     def __init__(self):
@@ -550,6 +636,22 @@ class RadiantDB(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.add += .12
+        return 0
+
+class RadiantRed(Item):
+    def __init__(self):
+        super().__init__("Radiant Red (no burn yet)", aspd=60, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.dmgMultiplier.add += .1
+        # champion.critDmg.add += 0.1
+        return 0
+
+class RadiantMorellos(Item):
+    def __init__(self):
+        super().__init__("RadiantMorellos (no burn yet)", aspd=25, ap=50, phases=None)
+
+    def performAbility(self, phase, time, champion, input_=0):
         return 0
 
 class RadiantAdaptive(Item):

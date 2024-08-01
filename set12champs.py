@@ -8,7 +8,7 @@ import status
 
 champ_list = ['Ezreal', 'Nomsy', 'Twitch', 'Ashe', 'Tristana', 'Galio', 'Zoe',
               'Veigar', 'Nilah', 'Ziggs', 'Ryze', 'Cassiopeia', 'Smolder',
-              'Seraphine', 'Kogmaw']
+              'Seraphine', 'Kogmaw', 'Ahri', 'Zilean', 'Karma']
 
 class Ezreal(Champion):
     def __init__(self, level):
@@ -28,14 +28,14 @@ class Ezreal(Champion):
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [2.6, 2.65, 2.75]
+        adScale = [3, 3, 3.1]
         abilityScale = [50, 60, 75]
         return abilityScale[level - 1] * (AP) + adScale[level - 1] * AD
 
     def performAbility(self, opponents, items, time):
         for count in range(self.total_targets):
             self.multiTargetSpell(opponents, items,
-                time, 1, lambda x, y, z: .8**(count) * self.abilityScaling(x, y, z), 'physical')
+                time, 1, lambda x, y, z: .75**(count) * self.abilityScaling(x, y, z), 'physical')
 
 class Nomsy(Champion):
     def __init__(self, level):
@@ -52,6 +52,7 @@ class Nomsy(Champion):
         self.default_traits = ['Dragon', 'Hunter']
         self.castTime = .5
         self.ultAmped = False
+        self.notes = "Dragon 2 not implemented yet"
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
@@ -102,7 +103,7 @@ class Twitch(Champion):
         hp= 450
         atk = 50
         curMana = 0
-        fullMana = 40
+        fullMana = 35
         aspd = .7
         armor = 15
         mr = 15
@@ -111,6 +112,7 @@ class Twitch(Champion):
         self.num_targets = 3
         self.status_duration = 5
         self.castTime = .5
+        self.ability_falloff = .1
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
@@ -121,10 +123,38 @@ class Twitch(Champion):
     def performAbility(self, opponents, items, time):
         for count in range(self.num_targets):
             # technically this is just hitting the 1st guy X times so we'll change it if it matters
-            self.multiTargetSpell(opponents, items,
-                time, 1, lambda x, y, z: .8**(count) * self.abilityScaling(x, y, z), 'physical')
+            self.multiTargetSpell(opponents, items, time, 1,
+                                  lambda x, y, z: (1-self.ability_falloff)**(count)*self.abilityScaling(x, y, z),
+                                  'physical', numAttacks=0)
             for opponent in opponents[0:self.num_targets]:
                 opponent.applyStatus(status.ArmorReduction("Twitch"), self, time, self.status_duration, .8)
+
+class Olaf(Champion):
+    def __init__(self, level):
+        hp= 1150
+        atk = 75
+        curMana = 30
+        fullMana = 80
+        aspd = .85
+        armor = 60
+        mr = 60
+        super().__init__('Olaf', hp, atk, curMana, fullMana,
+                         aspd, armor, mr, level)
+        self.default_traits = ['Frost', 'Hunter']
+        self.num_targets = 2
+        self.buff_duration = 5
+        self.aspd_bonus = [90, 100, 300]
+        self.castTime = 0
+        self.manalockDuration = self.buff_duration
+        # we instead just say that every other cast is amped
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [3.6, 3.6, 3.6]
+        return adScale[level - 1] * AD
+
+    def performAbility(self, opponents, items, time):
+        self.applyStatus(status.ASModifier("Olaf"),
+            self, time, self.buff_duration, self.aspd_bonus[self.level-1])
 
 class Nilah(Champion):
     def __init__(self, level):
@@ -173,6 +203,7 @@ class Ashe(Champion):
         self.ultCount = 0
         self.items = [buffs.AsheUlt()]
         # we instead just say that every other cast is amped
+        self.notes = "Multistriker proc is 4x multiplier to AS for 2 autos."
 
     def abilityScaling(self, level, AD, AP):
         adScale = [.5, .5, .5]
@@ -186,7 +217,7 @@ class Ashe(Champion):
 class Smolder(Champion):
     def __init__(self, level):
         hp= 1000
-        atk = 75
+        atk = 80
         curMana = 30
         fullMana = 80
         aspd = .85
@@ -201,6 +232,7 @@ class Smolder(Champion):
         self.manalockDuration = self.buff_duration # idk what it is
         
         self.items = [buffs.SmolderUlt()]
+        self.notes = "Dragon 2 not implemented yet"
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
@@ -279,6 +311,8 @@ class Ryze(Champion):
         super().__init__('Ryze', hp, atk, curMana, fullMana, aspd, armor, mr, level)
         self.default_traits = ['Scholar']
         self.castTime = 2.5
+        self.notes = "Currently 3 autos per cast. Not accurate to live behavior, as \
+                      # autos increases as Ryze AS increases."  
         # self.manalockDuration = 1
         # we instead just say that every other cast is amped
 
@@ -348,8 +382,72 @@ class Ziggs(Champion):
         abilityScale = [100, 150, 225]
         return abilityScale[level - 1] * (AP)
 
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(opponents, items,
+            time, 1, self.abilityScaling)
+        if self.num_targets > 1:
+            self.multiTargetSpell(opponents, items,
+                                  time, self.num_targets - 1,
+                                  self.secondaryAbilityScaling)
+
+class Karma(Champion):
+    # ignoring shred for now
+    def __init__(self, level):
+        hp= 850
+        atk = 45
+        curMana = 0
+        fullMana = 30
+        aspd = .75
+        armor = 30
+        mr = 30
+        super().__init__('Karma', hp, atk, curMana, fullMana, aspd, armor, mr, level)
+        # default traits: would be used in ui
+        self.default_traits = ['Incantor']
+        self.castTime = .5
+        self.manalockDuration = .75
+        self.notes = "Dmg is instant instead of DoT for clarity. \
+                      Incantor always assumes syndra."
+        # we instead just say that every other cast is amped
+
+    def abilityScaling(self, level, AD, AP):
+        abilityScale = [190, 285, 1600]
+        return abilityScale[level - 1] * (AP)
 
     def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(opponents, items,
+            time, 2, self.abilityScaling)
+
+class Zilean(Champion):
+    # ignoring shred for now
+    def __init__(self, level):
+        hp= 550
+        atk = 35
+        curMana = 20
+        fullMana = 70
+        aspd = .75
+        armor = 20
+        mr = 20
+        super().__init__('Zilean', hp, atk, curMana, fullMana, aspd, armor, mr, level)
+        # default traits: would be used in ui
+        self.default_traits = ['Frost', 'Preserver']
+        self.num_targets = 2
+        self.castTime = .5
+        self.manalockDuration = .75
+        self.notes = "For simplicity, bomb detonates instantly instead of after 1.25s"
+        # we instead just say that every other cast is amped
+
+    def abilityScaling(self, level, AD, AP):
+        abilityScale = [180, 270, 420]
+        return abilityScale[level - 1] * (AP)
+
+    def secondaryAbilityScaling(self, level, AD, AP):
+        abilityScale = [150, 225, 350]
+        return abilityScale[level - 1] * (AP)
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(opponents, items,
+            time, 1, self.abilityScaling)
+        # we don't delay the dmg because not much point
         self.multiTargetSpell(opponents, items,
             time, 1, self.abilityScaling)
         if self.num_targets > 1:
@@ -372,6 +470,7 @@ class Zoe(Champion):
         self.default_traits = ['Scholar']
         self.castTime = .5
         self.manalockDuration = .75
+        self.notes = "Currently does not reduce MR"
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
@@ -395,7 +494,9 @@ class Veigar(Champion):
         # default traits: would be used in ui
         self.default_traits = ['Honeymancy', 'Mage']
         self.castTime = .5
+        # recorded as about .8s with mage
         self.manalockDuration = .75
+        self.notes = "Honeymancy will not be implemented. Mage is coded to increase cast time by 1.8x."
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
@@ -411,90 +512,40 @@ class Veigar(Champion):
         self.multiTargetSpell(opponents, items,
                               time, 1, self.abilityScaling)
 
-class Syndra(Champion):
-    def __init__(self, level):
-        hp= 700
-        atk = 45
-        curMana = 0
-        fullMana = 30
-        aspd = .75
-        armor = 30
-        mr = 30
-        super().__init__('Syndra', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        # default traits: would be used in ui
-        self.default_traits = ['Fated', 'Arcanist']
-        self.butterflies = 6
-
-        self.castTime = 1.5
-        self.manalockDuration = 1.5
-        # we instead just say that every other cast is amped
-
-    def abilityScaling(self, level, AD, AP):
-        abilityScale = [45, 70, 180]
-        return abilityScale[level - 1] * (AP) * self.butterflies
-
-
-    def performAbility(self, opponents, items, time):
-        # not sure if its before or aftter cast
-        self.butterflies += 1
-        self.multiTargetSpell(opponents, items,
-            time, 1, self.abilityScaling)
-
-
-class Kindred(Champion):
+class Ahri(Champion):
     def __init__(self, level):
         hp= 550
-        atk = 40
+        atk = 45
         curMana = 0
-        fullMana = 30
-        aspd = .7
+        fullMana = 35
+        aspd = .75
         armor = 20
         mr = 20
-        super().__init__('Kindred', hp, atk, curMana, fullMana, aspd, armor, mr, level)
+        super().__init__('Ahri', hp, atk, curMana, fullMana, aspd, armor, mr, level)
         # default traits: would be used in ui
-        self.default_traits = ['Fated', 'Dryad', 'Reaper']
-        self.castTime = .5
-        self.manalockDuration = .75
+        self.ap.addMultiplier = 1.3
+        self.num_targets = 2
+        self.default_traits = ['ArcanaAhri', 'Scholar']
+
+        # seems to be 1.5s cast time, might get faster with higher AS?
+        self.castTime = 2
+        self.manalockDuration = 2
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
-        abilityScale = [135, 200, 300]
+        abilityScale = [135, 200, 280]
         return abilityScale[level - 1] * (AP)
-    def extraAbilityScaling(self, level, AD, AP):
-        abilityScale = [70, 105, 165]
+
+    def trueDmgAbilityScaling(self, level, AD, AP):
+        abilityScale = [90, 135, 210]
         return abilityScale[level - 1] * (AP)
 
     def performAbility(self, opponents, items, time):
-        self.multiTargetSpell(opponents, items,
-            time, 1, self.abilityScaling)
-        self.multiTargetSpell(opponents, items,
-            time, 1, self.extraAbilityScaling)
-
-class EtherealShen(Champion):
-    def __init__(self, level):
-        hp= 800
-        atk = 55    
-        curMana = 25
-        fullMana = 75
-        aspd = .7
-        armor = 20
-        mr = 20
-        super().__init__('Shen', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        # default traits: would be used in ui
-        self.castTime = 1
-        self.manalockDuration = 4
-        self.etherealStacks = 3
-        self.ultActive = False
-        self.items = [buffs.EtherealShen()]
-        # we instead just say that every other cast is amped
-
-    def abilityScaling(self, level, AD, AP):
-        abilityScale = [1, 1.5, 2.35]
-        return abilityScale[level - 1] * self.armor.stat
-
-    def performAbility(self, opponents, items, time):
-        self.ultActive = True
-        self.etherealStacks = 3
+        for target in range(self.num_targets):
+            self.multiTargetSpell(opponents, items,
+                                  time, 1, self.abilityScaling)
+            self.multiTargetSpell(opponents, items,
+                                  time, 1, self.trueDmgAbilityScaling, 'true')
 
 class Kogmaw(Champion):
     def __init__(self, level):
@@ -511,6 +562,7 @@ class Kogmaw(Champion):
         self.num_targets = 2
         self.manalockDuration = 1
         self.buff_duration = 4
+        self.notes = "Honeymancy will not be implemented"
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
@@ -526,87 +578,6 @@ class Kogmaw(Champion):
             self, time, self.buff_duration, asBuff[self.level - 1] * self.ap.stat)
         # add ad scaling
 
-class Aphelios(Champion):
-    def __init__(self, level):
-        hp= 650
-        atk = 60
-        curMana = 40
-        fullMana = 100
-        aspd = .75
-        armor = 25
-        mr = 25
-        super().__init__('Aphelios', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        self.default_traits = ['Fated', 'Sniper']
-        self.castTime = .5
-        self.num_targets = 3
-        self.manalockDuration = 1
-        self.status_duration = 7
-        # we instead just say that every other cast is amped
-
-    def abilityScaling(self, level, AD, AP):
-        adScale = [1.85, 1.85, 1.95]
-        abilityScale = [30, 45, 70]
-        return abilityScale[level - 1] * (AP) + adScale[level - 1] * AD
-
-    def performAbility(self, opponents, items, time):
-        # doesn't count as an autoattack
-        for opponent in opponents[0:self.num_targets]:
-            opponent.applyStatus(status.ArmorReduction("Aphelios"), self, time, self.status_duration, .8)
-        self.multiTargetSpell(opponents, items,
-            time, self.num_targets, self.abilityScaling, 'physical')
-        
-        # add ad scaling
-
-class Tristana(Champion):
-    def __init__(self, level):
-        hp= 700
-        atk = 55
-        curMana = 40
-        fullMana = 100
-        aspd = .75
-        armor = 25
-        mr = 25
-        super().__init__('Tristana', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        self.default_traits = ['Duelist']
-        self.castTime = 1.5
-        self.manalockDuration = 1.5
-        self.buff_duration = 6
-        # we instead just say that every other cast is amped
-
-    def abilityScaling(self, level, AD, AP):
-        adScale = [2.65, 2.65, 2.7]
-        abilityScale = [75, 115, 185]
-        return abilityScale[level - 1] * (AP) + adScale[level - 1] * AD
-
-    def performAbility(self, opponents, items, time):
-        self.multiTargetSpell(opponents, items,
-            time, 2, self.abilityScaling, 'physical')
-        adBuff = [50, 50, 55]
-        self.applyStatus(status.ADModifier("Senna"),
-            self, time, self.buff_duration, adBuff[self.level - 1])
-        # add ad scaling
-
-class Irelia(Champion):
-    def __init__(self, level):
-        hp= 900
-        atk = 80
-        curMana = 0
-        fullMana = 80
-        aspd = .9
-        armor = 40  
-        mr = 40
-        super().__init__('Irelia', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        self.castTime = 1
-        # self.items = [buffs.IreliaUlt()]
-
-    def abilityScaling(self, level, AD, AP):
-        adScale = [3,3,3]
-        apScale = [100, 100, 100]
-        return adScale[level - 1] * AD + apScale[level - 1] * AP
-
-    def performAbility(self, opponents, items, time):
-        self.multiTargetAttack(opponents, items,
-            time, 3, self.abilityScaling, 'physical', numAttacks=1)
 
 class ZeroResistance(Champion):
     def __init__(self, level):

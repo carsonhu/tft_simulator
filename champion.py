@@ -50,10 +50,11 @@ class AP(Stat):
         super().__init__(base, multModifier, addModifier)
         # temporary
         self.base = 100
+        self.addMultiplier = 1 # only for ahri
 
     @property
     def stat(self):
-        return self.mult * (self.base + self.add) / 100
+        return self.mult * (self.base + self.add * self.addMultiplier) / 100
 
 
 
@@ -104,6 +105,9 @@ class Champion(object):
         self.opponents = []
         self.dmgVector = []
         self.alive = True
+
+        # notes for user
+        self.notes = ""
         # self.ie = False # calculations for IE
 
         self.first_takedown = 5 # time of first takedown
@@ -203,7 +207,8 @@ class Champion(object):
         # Call any items which activate on each update
         for item in items:
             item.ability("onUpdate", time, self)
-        if self.canAttack(time):
+        if self.canAttack(time) and not self.canCast(time):
+            # if they can cast it overrides the 1st auto
             if opponents:
                 self.numAttacks += 1
                 self.performAttack(opponents, items, time, Stat(0, 1, 0))
@@ -214,13 +219,17 @@ class Champion(object):
                 item.ability("preAbility", time, self)
             self.performAbility(opponents, items, time)
             # set manalock
-            self.manalockTime = max(time + self.manalockDuration,
+            if time < .5:
+                # if they instant cast they shouldn't be manalocked
+                self.manalockTime = 0
+            else:
+                self.manalockTime = max(time + self.manalockDuration,
                                     time + self.castTime)
             self.curMana = self.curMana - self.fullMana.stat + self.startingMana
             # basically, can't attack before cast time up.
             # this logic might be slightly incorrect
             self.nextAttackTime = max(self.nextAttackTime,
-                                      time + self.castTime)    
+                                      time + self.castTime)
             for item in items:
                 item.ability("postAbility", time, self)
         

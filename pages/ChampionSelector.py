@@ -8,6 +8,7 @@ import set12champs
 import class_utilities
 import pandas as pd
 import numpy as np
+import copy
 import itertools
 import utils
 import inspect
@@ -19,12 +20,26 @@ simLists = []
 simDict = {}
 # this is going to be individual champ tab
 
+# Inject custom CSS to set the width of the sidebar
+# st.markdown(
+#     """
+#     <style>
+#         section[data-testid="stSidebar"] {
+#             width: 500px !important; # Set the width to your desired value
+#         }
+#     </style>
+#     """,
+#     unsafe_allow_html=True,
+# )
+
+
 champ_list = sorted(set12champs.champ_list)
 
 # all_items = []
-all_buffs = []
+all_buffs = sorted(set12buffs.class_buffs + set12buffs.augments
+            + set12buffs.no_buff)
 
-all_items = sorted(set12items.offensive_craftables + set12items.artifacts \
+all_items = sorted(set12items.offensive_craftables + set12items.artifacts
             + set12items.radiants + set12items.no_item)
 
 aug_buffs = sorted(set12buffs.augments)
@@ -34,12 +49,12 @@ aug_buffs = sorted(set12buffs.augments)
 #     if name != 'Item':
 #       all_items.append(name)
 
+# for name, obj in inspect.getmembers(set12buffs, inspect.isclass):
+#     # st.write(dir(obj))
+#     if name != 'Buff':
+#         all_buffs.append(name)
 
-for name, obj in inspect.getmembers(set12buffs, inspect.isclass):
-    # st.write(dir(obj))
-    if name != 'Buff':
-        all_buffs.append(name)
-
+champ_before_sims = None
 
 with st.sidebar:
     champ = class_utilities.champ_selector(champ_list)
@@ -63,7 +78,11 @@ with st.sidebar:
         levels = utils.class_for_name('set12buffs', buff[0]).levels
         for level in levels:
             if level != buff[1]:
-                extra_buffs.append(utils.class_for_name('set12buffs', buff[0])(level, []))
+                extra_buffs.append(utils.class_for_name('set12buffs', buff[0])(level, buff[2]))
+
+        # extraParameters = utils.class_for_name('set12buffs', buff1).extraParameters()
+        # if extraParameters != 0:
+
 
 
     enemy = class_utilities.enemy_list("Champ selector")
@@ -75,12 +94,8 @@ with st.sidebar:
       if item != 'NoItem':
         champ.items.append(utils.class_for_name('set12items', item)())
     class_utilities.add_buffs(champ, buffs)
-    
 
-    st.write(champ.items)
-    st.write([item.__class__.__name__ for item in champ.items])
-    st.write(aug_buffs)
-    st.write(utils.convertBuffList('set12buffs', aug_buffs))
+    champ_before_sims = copy.deepcopy(champ)
 
 # if st.button('Run trials'):
 simLists = set12_streamlit_snipers.doExperimentOneExtra(champ, enemy,
@@ -88,39 +103,62 @@ simLists = set12_streamlit_snipers.doExperimentOneExtra(champ, enemy,
            utils.convertStrList('set12buffs', aug_buffs) + extra_buffs, t)
 
 # Header
-st.header("{} {} vs {} HP, {} Armor, {} MR".format(champ.name, champ.level,
+st.header("{} {} vs {} HP, {} Armor, {} MR".format(champ_before_sims.name, champ_before_sims.level,
                                                    enemy.hp.stat,
                                                    enemy.armor.stat,
                                                    enemy.mr.stat))
 
+itemSimulator = set12_streamlit_snipers.Simulator()
+itemSimulator.itemStats(champ_before_sims.items, champ_before_sims)
+
+class_utilities.write_champion(champ_before_sims)
+
 # checkboxes
 
-checkbox_cols = st.columns(10)
 
-with checkbox_cols[0]:
-    craftables = st.checkbox("Craftable", value=True)
-with checkbox_cols[1]:
-    artifacts = st.checkbox("Artifact", value=False)
-with checkbox_cols[2]:
-    radiants = st.checkbox("Radiant", value=False)
-with checkbox_cols[3]:
-    traits = st.checkbox("Trait", value=False)
-with checkbox_cols[4]:
-    augments = st.checkbox("Augment", value=False)
+options = ["Craftable", "Artifact", "Radiant", "Trait", "Augment/Buff"]
+if len([item for item in items if item != 'NoItem']) >= 3:
+    options = ["Trait", "Augment/Buff"]
+radio_value = st.radio("",
+                       options, index=0, horizontal=True)
+
+# checkbox_cols = st.columns(10)
+
+# with checkbox_cols[0]:
+#     craftables = st.checkbox("Craftable", value=True)
+# with checkbox_cols[1]:
+#     artifacts = st.checkbox("Artifact", value=False)
+# with checkbox_cols[2]:
+#     radiants = st.checkbox("Radiant", value=False)
+# with checkbox_cols[3]:
+#     traits = st.checkbox("Trait", value=False)
+# with checkbox_cols[4]:
+#     augments = st.checkbox("Augment", value=False)
 
 df = set12_streamlit_snipers.createSelectorDPSTable(simLists)
 df_flt = df
 
-if not craftables:
-    df_flt = df_flt[~df_flt['Extra class name'].isin(set12items.offensive_craftables)]
-if not artifacts:
-    df_flt = df_flt[~df_flt['Extra class name'].isin(set12items.artifacts)]
-if not radiants:
-    df_flt = df_flt[~df_flt['Extra class name'].isin(set12items.radiants)]
-if not traits:
-    df_flt = df_flt[~df_flt['Extra class name'].isin([x[0] for x in buffs])]
-if not augments:
-    df_flt = df_flt[~df_flt['Extra class name'].isin(set12buffs.augments)]
+if radio_value == "Craftable":
+    df_flt = df_flt[df_flt['Extra class name'].isin(set12items.offensive_craftables+['NoItem'])]
+if radio_value == "Artifact":
+    df_flt = df_flt[df_flt['Extra class name'].isin(set12items.artifacts+['NoItem'])]
+if radio_value == "Radiant":
+    df_flt = df_flt[df_flt['Extra class name'].isin(set12items.radiants+['NoItem'])]
+if radio_value == "Trait":
+    df_flt = df_flt[df_flt['Extra class name'].isin([x[0] for x in buffs]+['NoItem'])]
+if radio_value == "Augment/Buff":
+    df_flt = df_flt[df_flt['Extra class name'].isin(set12buffs.augments+ ['NoItem'])]
+
+# if not craftables:
+#     df_flt = df_flt[~df_flt['Extra class name'].isin(set12items.offensive_craftables)]
+# if not artifacts:
+#     df_flt = df_flt[~df_flt['Extra class name'].isin(set12items.artifacts)]
+# if not radiants:
+#     df_flt = df_flt[~df_flt['Extra class name'].isin(set12items.radiants)]
+# if not traits:
+#     df_flt = df_flt[~df_flt['Extra class name'].isin([x[0] for x in buffs])]
+# if not augments:
+#     df_flt = df_flt[~df_flt['Extra class name'].isin(set12buffs.augments)]
 new_df = df_flt.drop(['Extra class name', 'Name', 'Level'], axis=1)
 class_utilities.plot_df(new_df, simLists)
 # st.write(new_df)

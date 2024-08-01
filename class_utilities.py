@@ -26,13 +26,10 @@ def buff_bar(buff_list, num_buffs=1, max_buffs=4, starting_buffs=[], default_ite
         TYPE: Description
     """
     st.header("Global Buffs")
-    item_cols = st.columns([3, 1])
+    item_cols = st.columns([2, 1, 1])
     num_buffs = st.slider('Number of Buffs',
     min_value=1, max_value=max_buffs, value=max(num_buffs, len(starting_buffs)))
     buffs = []
-
-    
-
     
     for n in range(num_buffs):
         index = 0
@@ -49,8 +46,65 @@ def buff_bar(buff_list, num_buffs=1, max_buffs=4, starting_buffs=[], default_ite
             buff1level = st.selectbox(
             'Level',
              utils.class_for_name('set12buffs', buff1).levels, key="Buff lvl {}".format(n))
-        buffs.append((buff1, buff1level))
+        with item_cols[2]:
+            extraParams = utils.class_for_name('set12buffs', buff1).extraParameters()
+            if extraParams != 0:
+                buff1Extra = st.number_input(extraParams["Title"],
+                                             min_value=extraParams["Min"],
+                                             max_value=extraParams["Max"],
+                                             value=extraParams["Default"],
+                                             key=extraParams["Title"])
+            else:
+                buff1Extra = st.number_input("(ignore)",
+                                             min_value=0,
+                                             max_value=0,
+                                             value=0,
+                                             key="extra buff" + buff1 + str(n))               
+        buffs.append((buff1, buff1level, buff1Extra))
     return buffs
+
+def write_champion(champ):
+    st.subheader("Base stats")
+    cols = st.columns(4)
+    ad_text = f"AD: :blue[{round(champ.atk.stat, 2)}] = {champ.atk.base} * :green[{round(champ.atk.mult, 4)} AD]"
+    ap_text = f"AP: :blue[{round(champ.ap.stat, 2)}] = {champ.ap.base} + :green[{round(champ.ap.add, 2)} AP]" \
+              if champ.ap.addMultiplier == 1 else \
+              f"AP: :blue[{round(champ.ap.stat, 2)}] = {champ.ap.base} + :red[{champ.ap.addMultiplier}] * :green[{round(champ.ap.add, 2)} AP]"
+    dmgamp_text = f"DmgAmp: :blue[{round(champ.dmgMultiplier.stat, 2)}] = {champ.dmgMultiplier.base} + :green[{round(champ.dmgMultiplier.add, 4)} DmgAmp]"    
+    mana_text = f"Mana: :blue[{round(champ.curMana, 2)}] / :blue[{round(champ.fullMana.stat, 2)}]"
+    cast_text = f"Cast Time: :blue[{champ.castTime} seconds]"
+
+    as_text = f"AS: :blue[{round(champ.aspd.stat, 3)}] = {champ.aspd.base} * (1 + :green[{round(champ.aspd.add, 4)} AS])"
+    crit_chance_text = f"Crit Chance: :blue[{round(champ.crit.stat, 3)}] = {champ.crit.base} + :green[{round(champ.crit.add, 4)} Crit]"
+    crit_dmg_text = f"Crit Dmg: :blue[{round(champ.critDmg.stat, 2)}] = {champ.critDmg.base} + :green[{round(champ.critDmg.add, 4)} CritDmg]"
+    mana_gen_text = f"ManaGen: :blue[{round(champ.manaPerAttack.stat, 2)}] = {champ.manaPerAttack.base} + :green[{round(champ.manaPerAttack.add, 2)} Mana]"
+    can_spellcrit_text = f"Can SpellCrit: :blue[{champ.canSpellCrit}]"
+    with cols[0]:
+        st.write(f"""
+          {ad_text}
+          <br>
+          {ap_text}
+          <br>
+          {dmgamp_text}
+          <br>
+          {mana_text}
+          <br>
+          {cast_text}
+          """, unsafe_allow_html=True)
+    with cols[1]:
+        st.write(f"""
+          {as_text}
+          <br>
+          {crit_chance_text}
+          <br>
+          {crit_dmg_text}
+          <br>
+          {mana_gen_text}
+          <br>
+          {can_spellcrit_text}
+          """, unsafe_allow_html=True)
+    if champ.notes:
+        st.write("Notes: " + champ.notes)
 
 def plot_df(df, simLists):
     df["To Plot"] = False
@@ -202,9 +256,9 @@ def add_items(champ, buffs, add_noitem=False):
     champ.items.append(utils.class_for_name('set12items', item)())
 
 def add_buffs(champ, buffs, add_noitem=False):
-  for buff, level in buffs:
+  for buff, level, extraParams, in buffs:
     if buff != 'NoBuff' or add_noitem:
-      champ.items.append(utils.class_for_name('set12buffs', buff)(level, []))
+      champ.items.append(utils.class_for_name('set12buffs', buff)(level, extraParams))
 
 
 
@@ -229,5 +283,9 @@ def champ_selector(champ_list):
     champlevel = st.selectbox(
     'Level',
      [1, 2, 3], index=1)
-  return utils.class_for_name('set12champs', champ)(champlevel)
+
+    
+
+  new_champ = utils.class_for_name('set12champs', champ)(champlevel)
+  return new_champ
 

@@ -2,10 +2,10 @@
 import status
 # from champion import Stat
 
-offensive_craftables = ['Rab', 'BT', 'Gunblade', 'Rageblade',
-                        'Archangels', 'HoJ', 'Guardbreaker', 'IE', 'LW',
+offensive_craftables = ['Rabadons', 'Bloodthirster', 'HextechGunblade', 'GuinsoosRageblade',
+                        'Archangels', 'HoJ', 'Guardbreaker', 'InfinityEdge', 'LastWhisper',
                         'Shojin', 'Titans', 'GS', 'GSNoGiant', 'Nashors',
-                        'Adaptive', 'RH', 'DB', 'QSS', 'JG', 'Red', 'Shiv',
+                        'Adaptive', 'RunaansHurricane', 'Deathblade', 'QSS', 'JeweledGauntlet', 'Red', 'Shiv',
                         'Blue', 'Morellos']
 
 artifacts = ['InfinityForce', 'Fishbones', 'RFC', 'Mittens', 'GamblersBlade',
@@ -16,10 +16,10 @@ artifacts = ['InfinityForce', 'Fishbones', 'RFC', 'Mittens', 'GamblersBlade',
              ]
 
 radiants = ['RadiantGuardbreaker', 'RadiantShiv', 'RadiantBlue',
-            'RadiantArchangels', 'RadiantRH', 'RadiantRageblade',
-            'RadiantLW', 'RadiantGS', 'RadiantRab', 'RadiantJG',
-            'RadiantNashors', 'RadiantShojin', 'RadiantIE',
-            'RadiantDB', 'RadiantAdaptive', 'RadiantTitans',
+            'RadiantArchangels', 'RadiantRunaansHurricane', 'RadiantGuinsoosRageblade',
+            'RadiantLastWhisper', 'RadiantGS', 'RadiantRabadons', 'RadiantJeweledGauntlet',
+            'RadiantNashors', 'RadiantShojin', 'RadiantInfinityEdge',
+            'RadiantDeathblade', 'RadiantAdaptive', 'RadiantTitans',
             'RadiantHoJ', 'RadiantRed', 'RadiantMorellos']
 
 no_item = ['NoItem']
@@ -54,7 +54,7 @@ class NoItem(Item):
     def __init__(self):
         super().__init__("NoItem", phases=None)
 
-class Rab(Item):
+class Rabadons(Item):
     def __init__(self):
         super().__init__("Rabadon's Deathcap", ap=50, has_radiant=True, phases="preCombat")
     def performAbility(self, phase, time, champion, input_):
@@ -62,15 +62,15 @@ class Rab(Item):
         champion.dmgMultiplier.add += .20
         return 0
 
-class BT(Item):
+class Bloodthirster(Item):
     def __init__(self):
         super().__init__("Bloodthirster", ad=20, ap=20, phases=None)
 
-class Gunblade(Item):
+class HextechGunblade(Item):
     def __init__(self):
         super().__init__("Gunblade", ad=15, ap=15, phases=None)
 
-class Rageblade(Item):
+class GuinsoosRageblade(Item):
     def __init__(self):
         super().__init__("Guinsoo's Rageblade", aspd=15, ap=10, has_radiant=True, phases=["postAttack"])
 
@@ -113,7 +113,7 @@ class Guardbreaker(Item):
         champion.dmgMultiplier.add += .25
         return 0
 
-class IE(Item):
+class InfinityEdge(Item):
     def __init__(self):
         super().__init__("Infinity Edge", ad=35, crit=35, has_radiant=True, phases=["postPreCombat"])
 
@@ -123,7 +123,7 @@ class IE(Item):
         champion.canSpellCrit = True
         return 0
 
-class LW(Item):
+class LastWhisper(Item):
     def __init__(self):
         super().__init__("Last Whisper", aspd=25, crit=20, ad=15, has_radiant=True, phases=["preAttack"])
 
@@ -192,7 +192,7 @@ class Adaptive(Item):
             self.nextMana += 3
         return 0
 
-class RH(Item):
+class RunaansHurricane(Item):
     def __init__(self):
         super().__init__("Runaan's Hurricane", aspd=10, ad=25, has_radiant=True, phases="preAttack")
 
@@ -202,7 +202,7 @@ class RH(Item):
             champion.doDamage(champion.opponents[1], [], 0, baseDmg, baseDmg,'physical', time)
         return 0
 
-class DB(Item):
+class Deathblade(Item):
     def __init__(self):
         super().__init__("Deathblade", ad=55, has_radiant=True, phases="preCombat")
 
@@ -222,7 +222,7 @@ class QSS(Item):
             self.nextAS += 2
         return 0
 
-class JG(Item):
+class JeweledGauntlet(Item):
     def __init__(self):
         super().__init__("Jeweled Gauntlet", crit=35, ap=35, has_radiant=True, phases=["postPreCombat"])
 
@@ -521,7 +521,7 @@ class RadiantArchangels(Item):
             self.nextAP += 4
         return 0
 
-class RadiantRH(Item):
+class RadiantRunaansHurricane(Item):
     def __init__(self):
         super().__init__("Radiant Runaan's", aspd=20, ad=35, phases="preAttack")
 
@@ -531,7 +531,7 @@ class RadiantRH(Item):
             champion.doDamage(champion.opponents[1], [], 0, baseDmg, baseDmg,'physical', time)
         return 0
 
-class RadiantRageblade(Item):
+class RadiantGuinsoosRageblade(Item):
     def __init__(self):
         super().__init__("Radiant Rageblade", aspd=20, ap=10, phases=["postAttack"])
 
@@ -547,7 +547,7 @@ class RadiantHoJ(Item):
     def performAbility(self, phase, time, champion, input_=0):
         return 0
 
-class RadiantLW(Item):
+class RadiantLastWhisper(Item):
     def __init__(self):
         super().__init__("Radiant LW", aspd=25, crit=55, ad=45, phases=["preAttack"])
 
@@ -569,7 +569,7 @@ class RadiantGS(Item):
             champion.dmgMultiplier.add += .6
         return 0
 
-class RadiantRab(Item):
+class RadiantRabadons(Item):
     def __init__(self):
         super().__init__("Radiant Rab", ap=70, phases="preCombat")
     def performAbility(self, phase, time, champion, input_):
@@ -577,7 +577,7 @@ class RadiantRab(Item):
         champion.dmgMultiplier.add += .5
         return 0
 
-class RadiantJG(Item):
+class RadiantJeweledGauntlet(Item):
     def __init__(self):
         super().__init__("Radiant JG", crit=75, ap=65, phases=["postPreCombat"])
 
@@ -613,16 +613,16 @@ class RadiantNashors(Item):
 
 class RadiantShojin(Item):
     def __init__(self):
-        super().__init__("Radiant Shojin", ad=50, mana=20, ap=50, phases=["preCombat"])
+        super().__init__("Radiant Spear of Shojin", ad=50, mana=20, ap=50, phases=["preCombat"])
         self.counter = 0
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.manaPerAttack.add += 10
         return 0
 
-class RadiantIE(Item):
+class RadiantInfinityEdge(Item):
     def __init__(self):
-        super().__init__("Radiant IE", ad=65, crit=75, phases=["postPreCombat"])
+        super().__init__("Radiant InfinityEdge", ad=65, crit=75, phases=["postPreCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
         if champion.canSpellCrit:
@@ -630,7 +630,7 @@ class RadiantIE(Item):
         champion.canSpellCrit = True
         return 0
 
-class RadiantDB(Item):
+class RadiantDeathblade(Item):
     def __init__(self):
         super().__init__("Radiant DB", ad=105, phases="preCombat")
 

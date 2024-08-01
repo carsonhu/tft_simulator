@@ -360,7 +360,6 @@ def doExperimentOneExtra(champion, opponent, itemList, buffList, t):
       equal_buffs = [champ_buff for champ_buff in champ.items if champ_buff.name.split(" ")[0] == buff.name.split(" ")[0]] 
       for equal_buff in equal_buffs:
         champ.items.remove(equal_buff)
-      print(champ.items)
       results = simulator.simulate([], [copy.deepcopy(buff)], champ,
                                    [copy.deepcopy(opponent) for i in range(8)], t)
       simList.append({"Champ": champ, "Extra": buff, "Results": results})

@@ -153,6 +153,11 @@ class Champion(object):
     def canAttack(self, time):
         return time >= self.nextAttackTime
 
+    def addMana(self, time, amount):
+        if time > self.manalockTime:
+            # may need to adjust this
+            self.curMana += amount
+
     def abilityScaling(self, level):
         # Abstract method
         return 0

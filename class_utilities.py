@@ -155,7 +155,7 @@ def plot_df(df, simLists):
 
       # label
 
-    col1, col2 = st.columns([2, 1])
+    col1, col2 = st.columns([3, 1])
 
     plot_labels = {key: '{}: {} {}'.format(key, value['Name'],
                                            value['Item']) for key, value in dmg_dict.items()}
@@ -169,7 +169,7 @@ def plot_df(df, simLists):
         with col2:
             index = st.selectbox('Index Log', list(dmg_dict.keys()),
                                  format_func=lambda x: plot_labels[x])
-            st.dataframe(dmg_dict[index]['Dmg'].round(2))
+            st.dataframe(dmg_dict[index]['Dmg'].round(2), hide_index=True, column_config={"Total Dmg": None})
 
     for key, value in dmg_dict.items():
         with col1:

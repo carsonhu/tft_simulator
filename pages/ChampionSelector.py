@@ -108,6 +108,8 @@ st.header("{} {} vs {} HP, {} Armor, {} MR".format(champ_before_sims.name, champ
                                                    enemy.armor.stat,
                                                    enemy.mr.stat))
 
+st.write("Most cast times/manalock times are guesses. Simulator is probably not very accurate to true gameplay at high attack speeds.")
+
 itemSimulator = set12_streamlit_snipers.Simulator()
 itemSimulator.itemStats(champ_before_sims.items, champ_before_sims)
 

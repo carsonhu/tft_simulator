@@ -3,10 +3,10 @@ import status
 # from champion import Stat
 
 offensive_craftables = ['Rabadons', 'Bloodthirster', 'HextechGunblade', 'GuinsoosRageblade',
-                        'Archangels', 'HoJ', 'Guardbreaker', 'InfinityEdge', 'LastWhisper',
+                        'Archangels', 'HoJ', 'Guardbreaker', 'GuardbreakerNoGuard', 'InfinityEdge', 'LastWhisper',
                         'Shojin', 'Titans', 'GS', 'GSNoGiant', 'Nashors',
                         'Adaptive', 'RunaansHurricane', 'Deathblade', 'QSS', 'JeweledGauntlet', 'Red', 'Shiv',
-                        'Blue', 'Morellos']
+                        'Blue', 'Morellos', 'FaerieQueensCrown']
 
 artifacts = ['InfinityForce', 'Fishbones', 'RFC', 'Mittens', 'GamblersBlade',
              'WitsEndStage2', 'WitsEndStage3', 'WitsEndStage4',
@@ -23,6 +23,7 @@ radiants = ['RadiantGuardbreaker', 'RadiantShiv', 'RadiantBlue',
             'RadiantHoJ', 'RadiantRed', 'RadiantMorellos']
 
 no_item = ['NoItem']
+
 
 class Item(object):
     def __init__(self, name, hp=0, ad=0, ap=0, 
@@ -113,6 +114,13 @@ class Guardbreaker(Item):
         champion.dmgMultiplier.add += .25
         return 0
 
+class GuardbreakerNoGuard(Item):
+    def __init__(self):
+        super().__init__("Guardbreaker (no shield)", crit=20, ap=10, aspd=20, has_radiant=True, phases=None)
+
+    def performAbility(self, phase, time, champion, input_=0):
+        return 0
+
 class InfinityEdge(Item):
     def __init__(self):
         super().__init__("Infinity Edge", ad=35, crit=35, has_radiant=True, phases=["postPreCombat"])
@@ -162,18 +170,18 @@ class Nashors(Item):
         super().__init__("Nashor's Tooth", aspd=10, ap=30, has_radiant=True, phases=["preAbility", "onUpdate"])
         self.active = False
         self.wearoffTime = 9999
-        self.duration = 4
+        self.base_duration = 4
         self.aspdBoost = 40
         # we just dont treat it as a sttus
 
     def performAbility(self, phase, time, champion, input_=0):
-        self.duration = champion.castTime + self.duration # add cast time
+        duration = champion.castTime + self.base_duration # add cast time
         if phase == "preAbility":
             if not self.active:
                 # if not active, give the AS bonus
                 champion.aspd.addStat(self.aspdBoost)
             self.active = True
-            self.wearoffTime = time + self.duration
+            self.wearoffTime = time + duration
         elif phase == "onUpdate":
             if time > self.wearoffTime and self.active:
                 # wearing off
@@ -188,7 +196,7 @@ class Adaptive(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         if time > self.nextMana:
-            champion.curMana += 10
+            champion.addMana(time, 10)
             self.nextMana += 3
         return 0
 
@@ -275,9 +283,10 @@ class GS(Item):
 
     def performAbility(self, phase, time, champion, input_):
         # input_ is target
-        vsGiants = champion.opponents[0].hp.stat >= 1750
-        if vsGiants:
-            champion.dmgMultiplier.add += .25
+        if len(champion.opponents) > 0:
+            vsGiants = champion.opponents[0].hp.stat >= 1750
+            if vsGiants:
+                champion.dmgMultiplier.add += .25
         return 0
 
 class GSNoGiant(Item):
@@ -307,6 +316,15 @@ class Blue(Item):
             if time > champion.first_takedown and not self.has_activated:
                 champion.dmgMultiplier.add += .08 # we actually want this only after 5s or so
                 self.has_activated = True
+        return 0
+
+### FAERIE CROWN
+
+class FaerieQueensCrown(Item):
+    def __init__(self):
+        super().__init__("FaerieQueen's Crown", ad=30, ap=30, phases=None)
+
+    def performAbility(self, phase, time, champion, input_=0):
         return 0
 
 ### ARTIFACTS
@@ -661,7 +679,7 @@ class RadiantAdaptive(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         if time > self.nextMana:
-            champion.curMana += 20
+            champion.addMana(time, 20)
             self.nextMana += 3
         return 0
 

@@ -7,7 +7,7 @@ import random
 
 class_buffs = ['Frost', 'Hunter', 'Dragon', 'Scholar', 'Blaster', 'Warrior',
                'Incantor', 'Multistriker', 'Mage', 'DejaVu', 'Pyro',
-               'ArcanaAhri', 'Preserver']
+               'ArcanaAhri', 'Preserver', 'Faerie', 'Chrono']
 
 augments = ['BlossomingLotusI', 'BlossomingLotusII',
             'ClockworkAccelerator', 'JeweledLotusII',
@@ -126,6 +126,27 @@ class Warrior(Buff):
         champion.dmgMultiplier.addStat(self.scaling[self.level])
         return 0
 
+class Faerie(Buff):
+    levels = [0, 2, 4, 6]
+    def __init__(self, level, params):
+        # params is number of stacks
+        super().__init__("Faerie " + str(level), level, params,
+                         phases=["onDoDamage"])
+        self.scaling = {0: 0, 2: .25, 4: .35, 6: .4}
+        self.stacks = 0
+
+    def performAbility(self, phase, time, champion, input_=0):
+        # weird hack, but total stacks is doubled since 'onDoDamage' is called twice on any damage strike,
+        # since it checks for crit and noncrit. Rather than create a special exception, might as well just do this
+        if "FaerieQueen's Crown" in [item.name for item in champion.items]:
+            if self.stacks < 24:
+                self.stacks += 1
+            elif self.stacks == 24:
+                self.stacks += 1
+                champion.dmgMultiplier.add += self.scaling[self.level]
+
+        return input_
+
 class Pyro(Buff):
     levels = [0, 2, 3, 4, 5]
     def __init__(self, level, params):
@@ -194,6 +215,27 @@ class Sugarcraft(Buff):
                 "Max": 7,
                 "Default": 0}
 
+class Chrono(Buff):
+    levels=[0, 2, 4, 6]
+    def __init__(self, level=1, params=0):
+        # vayne bolts inflicts status "Silver Bolts"
+        super().__init__("Chrono " + str(level), level, params, phases=["preCombat", "onUpdate"])
+        self.ap_scaling = {0: 0, 2: 20, 4: 35, 6: 35}
+        self.as_scaling = {0: 0, 2: 0, 4: 0, 6: 60}
+        self.baseBuff = 15
+        self.proc_time = 10
+
+        #self.chakramQueue = deque()
+        # chakram[0]: number of chakrams
+        # chakram[1]: time to end
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.ap.addStat(self.ap_scaling[self.level])
+        elif phase == "onUpdate":
+            if time >= self.proc_time:
+                self.proc_time = 999
+                champion.ap.addStat(self.ap_scaling[self.level])
+                champion.aspd.addStat(self.as_scaling[self.level])
 
 class Preserver(Buff):
     levels=[0, 2, 3, 4, 5]

@@ -23,7 +23,7 @@ class Ezreal(Champion):
         # default traits: would be used in ui
         # probably edit this to also include default level / params
         self.default_traits = ['Blaster']
-        self.total_targets = 4
+        self.num_targets = 4
         self.castTime = 1.5
         # we instead just say that every other cast is amped
 
@@ -33,7 +33,7 @@ class Ezreal(Champion):
         return abilityScale[level - 1] * (AP) + adScale[level - 1] * AD
 
     def performAbility(self, opponents, items, time):
-        for count in range(self.total_targets):
+        for count in range(self.num_targets):
             self.multiTargetSpell(opponents, items,
                 time, 1, lambda x, y, z: .75**(count) * self.abilityScaling(x, y, z), 'physical')
 
@@ -260,8 +260,7 @@ class Tristana(Champion):
         # default traits: would be used in ui
         # probably edit this to also include default level / params
         self.default_traits = ['Faerie', 'Blaster']
-        self.castTime = 1.5
-        # we instead just say that every other cast is amped
+        self.castTime = .5
 
     def abilityScaling(self, level, AD, AP):
         adScale = [3.35, 3.4, 3.5]
@@ -402,11 +401,12 @@ class Karma(Champion):
         mr = 30
         super().__init__('Karma', hp, atk, curMana, fullMana, aspd, armor, mr, level)
         # default traits: would be used in ui
-        self.default_traits = ['Incantor']
+        self.default_traits = ['Chrono', 'Incantor']
         self.castTime = .5
         self.manalockDuration = .75
         self.notes = "Dmg is instant instead of DoT for clarity. \
-                      Incantor always assumes syndra."
+                      Incantor always assumes syndra. \
+                      Chrono is flat 10 second proc time currently."
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):

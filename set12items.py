@@ -196,7 +196,8 @@ class Adaptive(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         if time > self.nextMana:
-            champion.addMana(time, 10)
+            champion.curMana += 10
+            # champion.addMana(time, 10)
             self.nextMana += 3
         return 0
 
@@ -679,7 +680,8 @@ class RadiantAdaptive(Item):
 
     def performAbility(self, phase, time, champion, input_=0):
         if time > self.nextMana:
-            champion.addMana(time, 20)
+            champion.curMana += 10
+            # champion.addMana(time, 20)
             self.nextMana += 3
         return 0
 

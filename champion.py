@@ -154,9 +154,9 @@ class Champion(object):
         return time >= self.nextAttackTime
 
     def addMana(self, time, amount):
-        if time > self.manalockTime:
-            # may need to adjust this
-            self.curMana += amount
+        # if time > self.manalockTime:
+        #     # may need to adjust this
+        self.curMana += amount
 
     def abilityScaling(self, level):
         # Abstract method
@@ -276,9 +276,12 @@ class Champion(object):
         for item in items:
             preDmg = item.ability("onDoDamage", time, self, preDmg)
             preCritDmg = item.ability("onDoDamage", time, self, preCritDmg)
-        dmg = self.damage(preDmg, dtype, opponent)
-        critDmg = self.damage(preCritDmg, dtype, opponent)
-        avgDmg = (dmg[0] * (1 - critChance) + critDmg[0] * critChance, dmg[1])
+
+        avgDmg = (preDmg * (1 - critChance) + preCritDmg * critChance)
+        for item in items:
+            avgDmg = item.ability("onDealDamage", time, self, avgDmg)
+        avgDmg = self.damage(avgDmg, dtype, opponent)
+        # avgDmg = (dmg[0] * (1 - critChance) + critDmg[0] * critChance, dmg[1])
         if avgDmg:
             # record (Time, Damage Dealt, current AS, current Mana)
             self.dmgVector.append((time, avgDmg, self.aspd.stat, self.curMana))

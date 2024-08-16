@@ -77,7 +77,7 @@ class Seraphine(Champion):
         hp= 500
         atk = 25
         curMana = 10
-        fullMana = 70
+        fullMana = 60
         aspd = .7
         armor = 15
         mr = 15
@@ -318,7 +318,7 @@ class Ryze(Champion):
     def abilityScaling(self, level, AD, AP):
         portals = 10 + math.floor(self.aspd.stat / .4)
 
-        abilityScale = [80, 120, 300]
+        abilityScale = [85, 130, 300]
         return abilityScale[level - 1] * (AP) * portals
 
 
@@ -525,7 +525,7 @@ class Ahri(Champion):
         # default traits: would be used in ui
         self.ap.addMultiplier = 1.3
         self.num_targets = 2
-        self.default_traits = ['ArcanaAhri', 'Scholar']
+        self.default_traits = ['ArcanaAhri', 'Scholar', 'ArcanaXerath', 'ArcanaEmblem']
 
         # seems to be 1.5s cast time, might get faster with higher AS?
         self.castTime = 2
@@ -533,11 +533,11 @@ class Ahri(Champion):
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
-        abilityScale = [135, 200, 280]
+        abilityScale = [140, 210, 325]
         return abilityScale[level - 1] * (AP)
 
     def trueDmgAbilityScaling(self, level, AD, AP):
-        abilityScale = [90, 135, 210]
+        abilityScale = [100, 150, 230]
         return abilityScale[level - 1] * (AP)
 
     def performAbility(self, opponents, items, time):
@@ -566,7 +566,7 @@ class Kogmaw(Champion):
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [2.9, 3, 3.25]
+        adScale = [2.8, 2.8, 2.9]
         return adScale[level - 1] * AD
 
     def performAbility(self, opponents, items, time):

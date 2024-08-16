@@ -7,11 +7,13 @@ import random
 
 class_buffs = ['Frost', 'Hunter', 'Dragon', 'Scholar', 'Blaster', 'Warrior',
                'Incantor', 'Multistriker', 'Mage', 'DejaVu', 'Pyro',
-               'ArcanaAhri', 'Preserver', 'Faerie', 'Chrono']
+               'ArcanaAhri', 'Preserver', 'Faerie', 'Chrono', 'ArcanaXerath',
+               'ArcanaEmblem']
 
 augments = ['BlossomingLotusI', 'BlossomingLotusII',
             'ClockworkAccelerator', 'JeweledLotusII',
-            'JeweledLotusIII', 'FinalAscension', 'Spellblades', 'Shred30']
+            'JeweledLotusIII', 'FinalAscension', 'Spellblades', 'Shred30',
+            'Yuumi1', 'Yuumi2']
 
 no_buff = ['NoBuff']
 
@@ -51,7 +53,7 @@ class Frost(Buff):
         # params is number of stacks
         super().__init__("Frost " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {3: 15, 5: 30, 7: 45, 9: 75}
+        self.scaling = {3: 16, 5: 35, 7: 50, 9: 80}
     def performAbility(self, phase, time, champion, input_=0):
         champion.atk.addStat(self.scaling[self.level])
         champion.ap.addStat(self.scaling[self.level])
@@ -93,7 +95,7 @@ class Scholar(Buff):
         # params is number of stacks
         super().__init__("Scholar " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {0: 0, 2: 3, 4: 5, 6: 10}
+        self.scaling = {0: 0, 2: 3, 4: 6, 6: 12}
     def performAbility(self, phase, time, champion, input_=0):
         champion.manaPerAttack.addStat(self.scaling[self.level])
         return 0
@@ -104,8 +106,8 @@ class Blaster(Buff):
         # params is number of stacks
         super().__init__("Blaster " + str(level), level, params,
                          phases=["preCombat", "preAbility"])
-        self.scaling = {0: 0, 2: .08, 4: .15, 6: .3}
-        self.burstScaling = {0: 0, 2: .17, 4: .3, 6: .6}
+        self.scaling = {0: 0, 2: .12, 4: .25, 6: .45}
+        self.burstScaling = {0: 0, 2: .13, 4: .25, 6: .45}
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             champion.dmgMultiplier.addStat(self.scaling[self.level])
@@ -121,7 +123,7 @@ class Warrior(Buff):
         # params is number of stacks
         super().__init__("Warrior " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {0: 0, 2: .1, 4: .18, 6: .25}
+        self.scaling = {0: 0, 2: .1, 4: .2, 6: .3}
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.addStat(self.scaling[self.level])
         return 0
@@ -131,17 +133,17 @@ class Faerie(Buff):
     def __init__(self, level, params):
         # params is number of stacks
         super().__init__("Faerie " + str(level), level, params,
-                         phases=["onDoDamage"])
-        self.scaling = {0: 0, 2: .25, 4: .35, 6: .4}
+                         phases=["onDealDamage"])
+        self.scaling = {0: 0, 2: .25, 4: .40, 6: .45}
         self.stacks = 0
 
     def performAbility(self, phase, time, champion, input_=0):
         # weird hack, but total stacks is doubled since 'onDoDamage' is called twice on any damage strike,
         # since it checks for crit and noncrit. Rather than create a special exception, might as well just do this
         if "FaerieQueen's Crown" in [item.name for item in champion.items]:
-            if self.stacks < 24:
+            if self.stacks < 12:
                 self.stacks += 1
-            elif self.stacks == 24:
+            elif self.stacks == 12:
                 self.stacks += 1
                 champion.dmgMultiplier.add += self.scaling[self.level]
 
@@ -194,6 +196,54 @@ class ArcanaAhri(Buff):
         for k, v in self.bonus_scaling.items():
             self.bonus_scaling[k] *= three_stars
 
+class ArcanaXerath(Buff):
+    levels = [0, 2, 3, 4, 5]
+    def __init__(self, level, params):
+        # params is number of three-stars
+        super().__init__("Arcana(Xerath) " + str(level), level, params,
+                         phases=["onDealDamage"])
+        self.scaling = {0: 0, 2: .03, 3: .05, 4: .07, 5: .1}
+        self.extraBuff(params)
+    def performAbility(self, phase, time, champion, input_=0):
+        true_dmg = self.scaling[self.level] * input_
+        champion.doDamage(champion.opponents[0], [], 0, true_dmg, true_dmg, 'true', time)
+        return input_
+
+    def extraParameters():
+        # defining the parameters for the extra shit
+        return {"Title": "# Charms",
+                "Min": 0,
+                "Max": 20,
+                "Default": 12}
+
+    def extraBuff(self, charms):
+        for k, v in self.scaling.items():
+            self.scaling[k] *= (charms // 3)
+
+class ArcanaEmblem(Buff):
+    levels = [0, 2, 3, 4, 5]
+    def __init__(self, level, params):
+        # params is number of three-stars
+        super().__init__("Arcana(Emblem) " + str(level), level, params,
+                         phases=["preCombat"])
+        self.scaling = {0: 0, 2: .06, 3: .09, 4: .12, 5: .15}
+        self.bonus_scaling = {0: 0, 2: .03, 3: .05, 4: .07, 5: .1}
+        self.extraBuff(params)
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.dmgMultiplier.addStat(self.scaling[self.level] + self.bonus_scaling[self.level])
+        return input_
+
+    def extraParameters():
+        # defining the parameters for the extra shit
+        return {"Title": "# Emblems",
+                "Min": 0,
+                "Max": 10,
+                "Default": 0}
+
+    def extraBuff(self, emblems):
+        for k, v in self.scaling.items():
+            self.bonus_scaling[k] *= emblems
+
 class Sugarcraft(Buff):
     levels = [0, 2, 3, 4, 5]
     def __init__(self, level, params):
@@ -237,12 +287,46 @@ class Chrono(Buff):
                 champion.ap.addStat(self.ap_scaling[self.level])
                 champion.aspd.addStat(self.as_scaling[self.level])
 
+class Yuumi1(Buff):
+    levels=[1]
+    def __init__(self, level=1, params=0):
+        # vayne bolts inflicts status "Silver Bolts"
+        super().__init__("Yuumi 1", level, params, phases=["onUpdate"])
+        self.scaling = 12
+        self.nextBonus = 4
+
+        #self.chakramQueue = deque()
+        # chakram[0]: number of chakrams
+        # chakram[1]: time to end
+    def performAbility(self, phase, time, champion, input_=0):
+        if time >= self.nextBonus:
+            self.nextBonus += 4
+            champion.atk.addStat(self.scaling)
+            champion.ap.addStat(self.scaling)
+
+class Yuumi2(Buff):
+    levels=[1]
+    def __init__(self, level=1, params=0):
+        # vayne bolts inflicts status "Silver Bolts"
+        super().__init__("Yuumi 2", level, params, phases=["onUpdate"])
+        self.scaling = 18
+        self.nextBonus = 4
+
+        #self.chakramQueue = deque()
+        # chakram[0]: number of chakrams
+        # chakram[1]: time to end
+    def performAbility(self, phase, time, champion, input_=0):
+        if time >= self.nextBonus:
+            self.nextBonus += 4
+            champion.atk.addStat(self.scaling)
+            champion.ap.addStat(self.scaling)
+
 class Preserver(Buff):
     levels=[0, 2, 3, 4, 5]
     def __init__(self, level=1, params=0):
         # vayne bolts inflicts status "Silver Bolts"
         super().__init__("Preserver " + str(level), level, params, phases=["onUpdate"])
-        self.scaling = {0: 0, 2: .03, 3: .05, 4: .08, 5: .12}
+        self.scaling = {0: 0, 2: .03, 3: .05, 4: .07, 5: .11}
         self.nextBonus = 3
 
         #self.chakramQueue = deque()
@@ -516,7 +600,7 @@ class Spellblades(Buff):
         # vayne bolts inflicts status "Silver Bolts"
         super().__init__("Spellblades", level, params, phases=["preAbility", "preAttack"])
         self.enhancedAuto = False
-
+        self.dmgRatio = 150
         #self.chakramQueue = deque()
         # chakram[0]: number of chakrams
         # chakram[1]: time to end
@@ -525,8 +609,8 @@ class Spellblades(Buff):
             self.enhancedAuto = True
         elif phase == "preAttack":
             if self.enhancedAuto:
-                champion.doDamage(champion.opponents[0], [], 0, champion.ap.stat * 175,
-                                  champion.ap.stat * 175, 'magical', time)
+                champion.doDamage(champion.opponents[0], [], 0, champion.ap.stat * self.dmgRatio,
+                                  champion.ap.stat * self.dmgRatio, 'magical', time)
 
         return 0
 
@@ -557,7 +641,7 @@ class ClockworkAccelerator(Buff):
         # vayne bolts inflicts status "Silver Bolts"
         super().__init__("Clockwork Accelerator", level, params, phases=["onUpdate"])
         self.asBonus = 6
-        self.nextBonus = 4
+        self.nextBonus = 3
 
         #self.chakramQueue = deque()
         # chakram[0]: number of chakrams
@@ -565,7 +649,7 @@ class ClockworkAccelerator(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "onUpdate":
             if time >= self.nextBonus:
-                self.nextBonus += 4
+                self.nextBonus += 3
                 champion.aspd.addStat(self.asBonus)
         return 0
 

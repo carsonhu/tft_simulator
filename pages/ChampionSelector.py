@@ -37,7 +37,7 @@ champ_list = sorted(set12champs.champ_list)
 
 # all_items = []
 all_buffs = sorted(set12buffs.class_buffs + set12buffs.augments
-            + set12buffs.no_buff)
+            + set12buffs.no_buff + set12buffs.stat_buffs)
 
 all_items = sorted(set12items.offensive_craftables + set12items.artifacts
             + set12items.radiants + set12items.no_item)
@@ -83,8 +83,6 @@ with st.sidebar:
         # extraParameters = utils.class_for_name('set12buffs', buff1).extraParameters()
         # if extraParameters != 0:
 
-
-
     enemy = class_utilities.enemy_list("Champ selector")
 
     class_utilities.first_takedown("Takedown", champ)
@@ -108,7 +106,7 @@ st.header("{} {} vs {} HP, {} Armor, {} MR".format(champ_before_sims.name, champ
                                                    enemy.armor.stat,
                                                    enemy.mr.stat))
 
-st.write("Most cast times/manalock times are guesses. Simulator is probably not very accurate to true gameplay at high attack speeds.")
+st.write("Most cast times/manalock times are guesses. Units can cast after they have completed 30\% of an autoattack. Simulator is probably not very accurate to true gameplay at high attack speeds.")
 
 itemSimulator = set12_streamlit_snipers.Simulator()
 itemSimulator.itemStats(champ_before_sims.items, champ_before_sims)
@@ -117,6 +115,7 @@ class_utilities.write_champion(champ_before_sims)
 
 # checkboxes
 
+display_dps = st.checkbox("Display DPS", value=False)
 
 options = ["Craftable", "Artifact", "Radiant", "Trait", "Augment/Buff"]
 if len([item for item in items if item != 'NoItem']) >= 3:
@@ -162,6 +161,12 @@ if radio_value == "Augment/Buff":
 # if not augments:
 #     df_flt = df_flt[~df_flt['Extra class name'].isin(set12buffs.augments)]
 new_df = df_flt.drop(['Extra class name', 'Name', 'Level'], axis=1)
+
+if not display_dps:
+    new_df = new_df.drop(['Extra DPS ({}s)'.format(i) for i in [5, 10, 15, 20]], axis=1)
+else:
+    new_df = new_df.drop(['DPS at {}'.format(i) for i in [5, 10, 15, 20, 25]], axis=1)
+
 class_utilities.plot_df(new_df, simLists)
 # st.write(new_df)
 

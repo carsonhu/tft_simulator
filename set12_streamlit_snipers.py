@@ -463,7 +463,9 @@ def createSelectorDPSTable(simLists):
     # new_entry['% True'] = dps['true']
     entries.append(new_entry)
     dict_key = (new_entry['Name'], new_entry['Level'], new_entry['Extra'])
-    dpsDict[dict_key] = new_entry['DPS at 25']
+    dpsDict[dict_key] = {}
+    for i in [5, 10, 15, 20, 25]:
+      dpsDict[dict_key][i] = new_entry['DPS at {}'.format(i)]
 
   for entry in entries:
     items = [entry['Extra']]
@@ -474,13 +476,14 @@ def createSelectorDPSTable(simLists):
       noitem_key = (entry['Name'], entry['Level'], 'NoItem')
       nobuff_key = (entry['Name'], entry['Level'], 'NoItem')
       item_key = (entry['Name'], entry['Level'], entry['Extra'])
-      entry['Extra DPS (25s)'] = 0
-      if item_key in dpsDict and noitem_key in dpsDict:
-        entry['Extra DPS (25s)'] = round(dpsDict[item_key] / dpsDict[noitem_key] \
-                                            if dpsDict[noitem_key] != 0 else 0, 2)
-      elif item_key in dpsDict and nobuff_key in dpsDict:
-        entry['Extra DPS (25s)'] = round(dpsDict[item_key] / dpsDict[noitem_key] \
-                                            if dpsDict[noitem_key] != 0 else 0, 2)
+      for i in [5, 10, 15, 20, 25]:
+        entry['Extra DPS ({}s)'.format(i)] = 0
+        if item_key in dpsDict and noitem_key in dpsDict:
+          entry['Extra DPS ({}s)'.format(i)] = round(dpsDict[item_key][i] / dpsDict[noitem_key][i] \
+                                              if dpsDict[noitem_key][i] != 0 else 0, 2)
+        elif item_key in dpsDict and nobuff_key in dpsDict:
+          entry['Extra DPS ({}s)'.format(i)] = round(dpsDict[item_key][i] / dpsDict[noitem_key][i] \
+                                              if dpsDict[noitem_key][i] != 0 else 0, 2)
 
 
   df = pd.DataFrame(entries)

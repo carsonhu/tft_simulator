@@ -56,7 +56,7 @@ class Nomsy(Champion):
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [3.45, 3.5, 3.55]
+        adScale = [4, 4, 4]
         abilityScale = [40, 60, 100]
         return abilityScale[level - 1] * (AP) + adScale[level - 1] * AD
 
@@ -116,7 +116,7 @@ class Twitch(Champion):
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [1.6, 1.6, 1.6]
+        adScale = [1.8, 1.8, 1.9]
         abilityScale = [20, 30, 45]
         return abilityScale[level - 1] * (AP) + adScale[level - 1] * AD
 
@@ -159,7 +159,7 @@ class Olaf(Champion):
 class Nilah(Champion):
     def __init__(self, level):
         hp= 700
-        atk = 55
+        atk = 50
         curMana = 0
         fullMana = 60
         aspd = .8
@@ -260,7 +260,7 @@ class Tristana(Champion):
         # default traits: would be used in ui
         # probably edit this to also include default level / params
         self.default_traits = ['Faerie', 'Blaster']
-        self.castTime = .5
+        self.castTime = .7
 
     def abilityScaling(self, level, AD, AP):
         adScale = [3.35, 3.4, 3.5]
@@ -309,14 +309,14 @@ class Ryze(Champion):
         mr = 30
         super().__init__('Ryze', hp, atk, curMana, fullMana, aspd, armor, mr, level)
         self.default_traits = ['Scholar']
-        self.castTime = 2.5
+        self.castTime = 1.5
         self.notes = "Currently 3 autos per cast. Not accurate to live behavior, as \
                       # autos increases as Ryze AS increases."  
         # self.manalockDuration = 1
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
-        portals = 10 + math.floor(self.aspd.stat / .4)
+        portals = 10 + math.ceil(self.aspd.stat / .4)
 
         abilityScale = [85, 130, 300]
         return abilityScale[level - 1] * (AP) * portals
@@ -361,7 +361,7 @@ class Ziggs(Champion):
         hp= 450
         atk = 40
         curMana = 0
-        fullMana = 50
+        fullMana = 40
         aspd = .7
         armor = 15
         mr = 15
@@ -403,7 +403,7 @@ class Karma(Champion):
         # default traits: would be used in ui
         self.default_traits = ['Chrono', 'Incantor']
         self.castTime = .5
-        self.manalockDuration = .75
+        self.manalockDuration = .5
         self.notes = "Dmg is instant instead of DoT for clarity. \
                       Incantor always assumes syndra. \
                       Chrono is flat 10 second proc time currently."
@@ -500,7 +500,7 @@ class Veigar(Champion):
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
-        abilityScale = [215, 320, 515]
+        abilityScale = [240, 330, 475]
         return abilityScale[level - 1] * (AP)
 
     def extraParameter(self, input_):
@@ -523,21 +523,21 @@ class Ahri(Champion):
         mr = 20
         super().__init__('Ahri', hp, atk, curMana, fullMana, aspd, armor, mr, level)
         # default traits: would be used in ui
-        self.ap.addMultiplier = 1.3
+        self.ap.addMultiplier = 1.15
         self.num_targets = 2
         self.default_traits = ['ArcanaAhri', 'Scholar', 'ArcanaXerath', 'ArcanaEmblem']
 
         # seems to be 1.5s cast time, might get faster with higher AS?
-        self.castTime = 2
-        self.manalockDuration = 2
+        self.castTime = 1.5
+        self.manalockDuration = 1.5
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
-        abilityScale = [140, 210, 325]
+        abilityScale = [135, 200, 310]
         return abilityScale[level - 1] * (AP)
 
     def trueDmgAbilityScaling(self, level, AD, AP):
-        abilityScale = [100, 150, 230]
+        abilityScale = [85, 125, 195]
         return abilityScale[level - 1] * (AP)
 
     def performAbility(self, opponents, items, time):

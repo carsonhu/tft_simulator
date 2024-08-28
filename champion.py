@@ -97,8 +97,9 @@ class Champion(object):
         self.canCrit = True
         self.canSpellCrit = False
         self.manalockTime = -1  # time until unmanalocked
-        self.manalockDuration = 1  # how long manalock lasts
+        self.manalockDuration = 0  # how long manalock lasts
         self.castTime = 0
+        self.attackWindupLockout = 0 # attack windup: can only cast after attack windup is finished
         self.items = []
         self.statuses = {}  # current statuses
         self.nextAttackTime = 0
@@ -148,7 +149,7 @@ class Champion(object):
     def canCast(self, time):
         # check whether we can currently cast
         return self.curMana >= self.fullMana.stat and self.fullMana.stat > -1 \
-            and self.manalockTime <= time
+            and self.manalockTime <= time and self.attackWindupLockout < time
 
     def canAttack(self, time):
         return time >= self.nextAttackTime
@@ -218,6 +219,8 @@ class Champion(object):
                 self.numAttacks += 1
                 self.performAttack(opponents, items, time, Stat(0, 1, 0))
                 self.nextAttackTime += self.attackTime()
+
+                self.attackWindupLockout = time + self.attackTime() * .3
         if self.canCast(time):
             self.numCasts += 1
             for item in items:
@@ -267,20 +270,26 @@ class Champion(object):
         return self.critDmg.stat + max(0, 0 + (self.crit.stat - 1) / 2)
 
     def doDamage(self, opponent, items, critChance, damageIfCrit, damage,
-                 dtype, time):
+                 dtype, time, is_spell=False):
         # actually doing damage: consider average of damage if crit and damage
         # if not crit
         critChance = min(1, critChance)
         preDmg = damage
         preCritDmg = damageIfCrit
-        for item in items:
-            preDmg = item.ability("onDoDamage", time, self, preDmg)
-            preCritDmg = item.ability("onDoDamage", time, self, preCritDmg)
+        # for item in items:
+        #     preDmg = item.ability("onDoDamage", time, self, preDmg)
+        #     preCritDmg = item.ability("onDoDamage", time, self, preCritDmg)
 
         avgDmg = (preDmg * (1 - critChance) + preCritDmg * critChance)
         for item in items:
             avgDmg = item.ability("onDealDamage", time, self, avgDmg)
+        if is_spell:
+            for item in items:
+                avgDmg = item.ability("onDealSpellDamage", time, self, avgDmg)
+
         avgDmg = self.damage(avgDmg, dtype, opponent)
+
+        
         # avgDmg = (dmg[0] * (1 - critChance) + critDmg[0] * critChance, dmg[1])
         if avgDmg:
             # record (Time, Damage Dealt, current AS, current Mana)
@@ -306,7 +315,7 @@ class Champion(object):
         baseDmg *= self.dmgMultiplier.stat
         baseCritDmg *= self.dmgMultiplier.stat
         for opponent in opponents[0:targets]:
-            self.doDamage(opponent, items, self.crit.stat, baseCritDmg, baseDmg, type, time)
+            self.doDamage(opponent, items, self.crit.stat, baseCritDmg, baseDmg, type, time, is_spell=True)
         for a in range(numAttacks):
             for item in items:
                 item.ability("postAttack", time, self)
@@ -346,7 +355,7 @@ class Champion(object):
         baseDmg *= self.dmgMultiplier.stat
         baseCritDmg *= self.dmgMultiplier.stat
         for opponent in opponents[0:targets]:
-            self.doDamage(opponent, items, self.crit.stat, baseCritDmg, baseDmg, type, time)    
+            self.doDamage(opponent, items, self.crit.stat, baseCritDmg, baseDmg, type, time, is_spell=True)    
 
     def damage(self, dmg, dtype, defender):
         """deal dmg, dmg is premitigated

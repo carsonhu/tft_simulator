@@ -60,7 +60,7 @@ class Rabadons(Item):
         super().__init__("Rabadon's Deathcap", ap=50, has_radiant=True, phases="preCombat")
     def performAbility(self, phase, time, champion, input_):
         # input_ is target
-        champion.dmgMultiplier.add += .20
+        champion.dmgMultiplier.add += .15
         return 0
 
 class Bloodthirster(Item):
@@ -73,7 +73,7 @@ class HextechGunblade(Item):
 
 class GuinsoosRageblade(Item):
     def __init__(self):
-        super().__init__("Guinsoo's Rageblade", aspd=15, ap=10, has_radiant=True, phases=["postAttack"])
+        super().__init__("Guinsoo's Rageblade", aspd=10, ap=10, has_radiant=True, phases=["postAttack"])
 
     def performAbility(self, phase, time, champion, input_=0):
         if champion.aspd.stat <= 5:
@@ -133,7 +133,7 @@ class InfinityEdge(Item):
 
 class LastWhisper(Item):
     def __init__(self):
-        super().__init__("Last Whisper", aspd=25, crit=20, ad=15, has_radiant=True, phases=["preAttack"])
+        super().__init__("Last Whisper", aspd=20, crit=20, ad=15, has_radiant=True, phases=["preAttack"])
 
     def performAbility(self, phase, time, champion, opponents):
         # NOTE: LW usually applies AFTER attack but we want to calculate w/ reduced armor
@@ -143,7 +143,7 @@ class LastWhisper(Item):
 
 class Shojin(Item):
     def __init__(self):
-        super().__init__("Spear of Shojin", ad=20, mana=15, ap=20, has_radiant=True, phases=["preCombat"])
+        super().__init__("Spear of Shojin", ad=2    , mana=15, ap=20, has_radiant=True, phases=["preCombat"])
         self.counter = 0
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -167,11 +167,11 @@ class Titans(Item):
 
 class Nashors(Item):
     def __init__(self):
-        super().__init__("Nashor's Tooth", aspd=10, ap=30, has_radiant=True, phases=["preAbility", "onUpdate"])
+        super().__init__("Nashor's Tooth", aspd=10, ap=25, has_radiant=True, phases=["preAbility", "onUpdate"])
         self.active = False
         self.wearoffTime = 9999
         self.base_duration = 4
-        self.aspdBoost = 40
+        self.aspdBoost = 35
         # we just dont treat it as a sttus
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -191,7 +191,7 @@ class Nashors(Item):
 
 class Adaptive(Item):
     def __init__(self):
-        super().__init__("Adaptive Helm", mana=15, ap=35, has_radiant=True, phases="onUpdate")
+        super().__init__("Adaptive Helm", mana=15, ap=30, has_radiant=True, phases="onUpdate")
         self.nextMana = 3
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -213,7 +213,7 @@ class RunaansHurricane(Item):
 
 class Deathblade(Item):
     def __init__(self):
-        super().__init__("Deathblade", ad=55, has_radiant=True, phases="preCombat")
+        super().__init__("Deathblade", ad=50, has_radiant=True, phases="preCombat")
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.add += .08
@@ -243,7 +243,7 @@ class JeweledGauntlet(Item):
 
 class Red(Item):
     def __init__(self):
-        super().__init__("Red (no burn yet)", aspd=40, phases=["preCombat"])
+        super().__init__("Red (no burn yet)", aspd=35, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.add += .06
@@ -259,7 +259,7 @@ class Morellos(Item):
 
 class Shiv(Item):
     def __init__(self):
-        super().__init__("Statikk Shiv", ap=15, aspd=20, mana=15, has_radiant=True, phases=["preAttack"])
+        super().__init__("Statikk Shiv", ap=15, aspd=15, mana=15, has_radiant=True, phases=["preAttack"])
         self.shivDmg = 30
         self.shivTargets = 4
         self.counter = 0
@@ -280,7 +280,7 @@ class Shiv(Item):
 class GS(Item):
     # needs reworking
     def __init__(self):
-        super().__init__("Giant Slayer", aspd=10, ad=30, ap=20, has_radiant=True, phases="preCombat")
+        super().__init__("Giant Slayer", aspd=10, ad=25, ap=25, has_radiant=True, phases="preCombat")
 
     def performAbility(self, phase, time, champion, input_):
         # input_ is target
@@ -293,7 +293,7 @@ class GS(Item):
 class GSNoGiant(Item):
     # needs reworking
     def __init__(self):
-        super().__init__("Giant Slayer (no Giant)", aspd=10, ad=30, ap=20, has_radiant=True, phases=None)
+        super().__init__("Giant Slayer (no Giant)", aspd=10, ad=25, ap=25, has_radiant=True, phases=None)
 
     def performAbility(self, phase, time, champion, input_):
         return 0
@@ -304,7 +304,7 @@ class Bramble(Item):
 
 class Blue(Item):
     def __init__(self):
-        super().__init__("Blue Buff", mana=20, ap=20, ad=20, has_radiant=True, phases=["preCombat", "onUpdate"])
+        super().__init__("Blue Buff", mana=20, ap=15, ad=15, has_radiant=True, phases=["preCombat", "onUpdate"])
         self.has_activated = False
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -336,7 +336,7 @@ class InfinityForce(Item):
 
 class Fishbones(Item):
     def __init__(self):
-        super().__init__("Fishbones", aspd=35, ad=35, phases=None)
+        super().__init__("Fishbones", aspd=40, ad=40, phases=None)
 
     def performAbility(self, phase, time, champion, input_):
         return 0
@@ -486,10 +486,10 @@ class WitsEndStage6(Item):
 ### RADIANTS
 class RadiantGuardbreaker(Item):
     def __init__(self):
-        super().__init__("Radiant Guardbreaker", crit=20, ap=30, aspd=40, phases=["preCombat"])
+        super().__init__("Radiant Guardbreaker", crit=20, ap=30, aspd=30, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.dmgMultiplier.add += .5
+        champion.dmgMultiplier.add += .4
         return 0
 
 class RadiantShiv(Item):
@@ -514,7 +514,7 @@ class RadiantShiv(Item):
 
 class RadiantBlue(Item):
     def __init__(self):
-        super().__init__("Radiant Blue", mana=60, ap=60, ad=60, phases=["preCombat", "onUpdate"])
+        super().__init__("Radiant Blue", mana=60, ap=50, ad=50, phases=["preCombat", "onUpdate"])
         self.has_activated = False
         
 
@@ -561,7 +561,7 @@ class RadiantGuinsoosRageblade(Item):
 
 class RadiantHoJ(Item):
     def __init__(self):
-        super().__init__("Radiant HoJ", mana=10, crit=40, ad=60, ap=60, phases=None)
+        super().__init__("Radiant HoJ", mana=10, crit=40, ad=50, ap=50, phases=None)
 
     def performAbility(self, phase, time, champion, input_=0):
         return 0
@@ -579,7 +579,7 @@ class RadiantLastWhisper(Item):
 class RadiantGS(Item):
     # needs reworking
     def __init__(self):
-        super().__init__("Radiant GS", aspd=10, ad=50, ap=40, phases="preCombat")
+        super().__init__("Radiant GS", aspd=10, ad=40, ap=40, phases="preCombat")
 
     def performAbility(self, phase, time, champion, input_):
         # input_ is target
@@ -598,7 +598,7 @@ class RadiantRabadons(Item):
 
 class RadiantJeweledGauntlet(Item):
     def __init__(self):
-        super().__init__("Radiant JG", crit=75, ap=65, phases=["postPreCombat"])
+        super().__init__("Radiant JG", crit=75, ap=55, phases=["postPreCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
         if champion.canSpellCrit:
@@ -612,7 +612,7 @@ class RadiantNashors(Item):
         self.active = False
         self.wearoffTime = 9999
         self.duration = 8
-        self.aspdBoost = 80
+        self.aspdBoost = 65
         # we just dont treat it as a sttus
 
     def performAbility(self, phase, time, champion, input_=0):

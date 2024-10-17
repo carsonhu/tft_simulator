@@ -160,6 +160,8 @@ def plot_df(df, simLists):
     plot_labels = {key: '{}: {} {}'.format(key, value['Name'],
                                            value['Item']) for key, value in dmg_dict.items()}
 
+    # setting the title
+
     if len(dmg_dict) > 0:
         with col1:
             fig, ax = plt.subplots()

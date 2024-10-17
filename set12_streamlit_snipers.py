@@ -342,6 +342,10 @@ def doExperimentGivenItems(champions, opponent, itemCombo, buffs, t):
     # return simList  
 
 def radiantRefactor(champions, opponent, itemList, t):
+    simulator = Simulator()
+    simList = []
+    # for champ in champions:
+    # for item in itemlist
     # to get the radiants
     return 0
 

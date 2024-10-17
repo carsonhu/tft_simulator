@@ -100,73 +100,76 @@ simLists = set12_streamlit_snipers.doExperimentOneExtra(champ, enemy,
            utils.convertStrList('set12items', all_items),
            utils.convertStrList('set12buffs', aug_buffs) + extra_buffs, t)
 
-# Header
-st.header("{} {} vs {} HP, {} Armor, {} MR".format(champ_before_sims.name, champ_before_sims.level,
-                                                   enemy.hp.stat,
-                                                   enemy.armor.stat,
-                                                   enemy.mr.stat))
+tab1, tab2 = st.tabs(["Items", "Radiant Refractor"])
 
-st.write("Most cast times/manalock times are guesses. Units can cast after they have completed 30\% of an autoattack. Simulator is probably not very accurate to true gameplay at high attack speeds.")
+with tab1:
+    # Header
+    st.header("{} {} vs {} HP, {} Armor, {} MR".format(champ_before_sims.name, champ_before_sims.level,
+                                                       enemy.hp.stat,
+                                                       enemy.armor.stat,
+                                                       enemy.mr.stat))
 
-itemSimulator = set12_streamlit_snipers.Simulator()
-itemSimulator.itemStats(champ_before_sims.items, champ_before_sims)
+    st.write("Most cast times/manalock times are guesses. Units can cast after they have completed 30\% of an autoattack. Simulator is probably not very accurate to true gameplay at high attack speeds.")
 
-class_utilities.write_champion(champ_before_sims)
+    itemSimulator = set12_streamlit_snipers.Simulator()
+    itemSimulator.itemStats(champ_before_sims.items, champ_before_sims)
 
-# checkboxes
+    class_utilities.write_champion(champ_before_sims)
 
-display_dps = st.checkbox("Display DPS", value=False)
+    # checkboxes
 
-options = ["Craftable", "Artifact", "Radiant", "Trait", "Augment/Buff"]
-if len([item for item in items if item != 'NoItem']) >= 3:
-    options = ["Trait", "Augment/Buff"]
-radio_value = st.radio("",
-                       options, index=0, horizontal=True)
+    display_dps = st.checkbox("Display DPS", value=False)
 
-# checkbox_cols = st.columns(10)
+    options = ["Craftable", "Artifact", "Radiant", "Trait", "Augment/Buff"]
+    if len([item for item in items if item != 'NoItem']) >= 3:
+        options = ["Trait", "Augment/Buff"]
+    radio_value = st.radio("",
+                           options, index=0, horizontal=True)
 
-# with checkbox_cols[0]:
-#     craftables = st.checkbox("Craftable", value=True)
-# with checkbox_cols[1]:
-#     artifacts = st.checkbox("Artifact", value=False)
-# with checkbox_cols[2]:
-#     radiants = st.checkbox("Radiant", value=False)
-# with checkbox_cols[3]:
-#     traits = st.checkbox("Trait", value=False)
-# with checkbox_cols[4]:
-#     augments = st.checkbox("Augment", value=False)
+    # checkbox_cols = st.columns(10)
 
-df = set12_streamlit_snipers.createSelectorDPSTable(simLists)
-df_flt = df
+    # with checkbox_cols[0]:
+    #     craftables = st.checkbox("Craftable", value=True)
+    # with checkbox_cols[1]:
+    #     artifacts = st.checkbox("Artifact", value=False)
+    # with checkbox_cols[2]:
+    #     radiants = st.checkbox("Radiant", value=False)
+    # with checkbox_cols[3]:
+    #     traits = st.checkbox("Trait", value=False)
+    # with checkbox_cols[4]:
+    #     augments = st.checkbox("Augment", value=False)
 
-if radio_value == "Craftable":
-    df_flt = df_flt[df_flt['Extra class name'].isin(set12items.offensive_craftables+['NoItem'])]
-if radio_value == "Artifact":
-    df_flt = df_flt[df_flt['Extra class name'].isin(set12items.artifacts+['NoItem'])]
-if radio_value == "Radiant":
-    df_flt = df_flt[df_flt['Extra class name'].isin(set12items.radiants+['NoItem'])]
-if radio_value == "Trait":
-    df_flt = df_flt[df_flt['Extra class name'].isin([x[0] for x in buffs]+['NoItem'])]
-if radio_value == "Augment/Buff":
-    df_flt = df_flt[df_flt['Extra class name'].isin(set12buffs.augments+ ['NoItem'])]
+    df = set12_streamlit_snipers.createSelectorDPSTable(simLists)
+    df_flt = df
 
-# if not craftables:
-#     df_flt = df_flt[~df_flt['Extra class name'].isin(set12items.offensive_craftables)]
-# if not artifacts:
-#     df_flt = df_flt[~df_flt['Extra class name'].isin(set12items.artifacts)]
-# if not radiants:
-#     df_flt = df_flt[~df_flt['Extra class name'].isin(set12items.radiants)]
-# if not traits:
-#     df_flt = df_flt[~df_flt['Extra class name'].isin([x[0] for x in buffs])]
-# if not augments:
-#     df_flt = df_flt[~df_flt['Extra class name'].isin(set12buffs.augments)]
-new_df = df_flt.drop(['Extra class name', 'Name', 'Level'], axis=1)
+    if radio_value == "Craftable":
+        df_flt = df_flt[df_flt['Extra class name'].isin(set12items.offensive_craftables+['NoItem'])]
+    if radio_value == "Artifact":
+        df_flt = df_flt[df_flt['Extra class name'].isin(set12items.artifacts+['NoItem'])]
+    if radio_value == "Radiant":
+        df_flt = df_flt[df_flt['Extra class name'].isin(set12items.radiants+['NoItem'])]
+    if radio_value == "Trait":
+        df_flt = df_flt[df_flt['Extra class name'].isin([x[0] for x in buffs]+['NoItem'])]
+    if radio_value == "Augment/Buff":
+        df_flt = df_flt[df_flt['Extra class name'].isin(set12buffs.augments+ ['NoItem'])]
 
-if not display_dps:
-    new_df = new_df.drop(['Extra DPS ({}s)'.format(i) for i in [5, 10, 15, 20]], axis=1)
-else:
-    new_df = new_df.drop(['DPS at {}'.format(i) for i in [5, 10, 15, 20, 25]], axis=1)
+    # if not craftables:
+    #     df_flt = df_flt[~df_flt['Extra class name'].isin(set12items.offensive_craftables)]
+    # if not artifacts:
+    #     df_flt = df_flt[~df_flt['Extra class name'].isin(set12items.artifacts)]
+    # if not radiants:
+    #     df_flt = df_flt[~df_flt['Extra class name'].isin(set12items.radiants)]
+    # if not traits:
+    #     df_flt = df_flt[~df_flt['Extra class name'].isin([x[0] for x in buffs])]
+    # if not augments:
+    #     df_flt = df_flt[~df_flt['Extra class name'].isin(set12buffs.augments)]
+    new_df = df_flt.drop(['Extra class name', 'Name', 'Level'], axis=1)
 
-class_utilities.plot_df(new_df, simLists)
-# st.write(new_df)
+    if not display_dps:
+        new_df = new_df.drop(['Extra DPS ({}s)'.format(i) for i in [5, 10, 15, 20]], axis=1)
+    else:
+        new_df = new_df.drop(['DPS at {}'.format(i) for i in [5, 10, 15, 20, 25]], axis=1)
+
+    class_utilities.plot_df(new_df, simLists)
+    # st.write(new_df)
 

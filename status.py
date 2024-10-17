@@ -211,6 +211,39 @@ class KaisaBuff(Status):
         champion.aspd.add  -= self.addition
         return True
 
+class DecayingASModifier(Status):
+    # increase AS by %
+    # NOTE: does not work with stacking
+    def __init__(self, name):
+        super().__init__("Decaying AS Modifier {}".format(name))
+        self.addition = 1
+        self.duration = 0
+
+    def applicationEffect(self, champion, time, duration, params):
+        champion.aspd.add += params
+        self.addition = params
+        self.amount_to_decrease = self.addition / (duration / (1 / 30))
+        self.duration = duration
+        return True
+
+    def reapplicationEffect(self, champion, time, duration, params):
+        # champion.aspd.add += params
+        # self.addition = params
+        return True
+    def wearoffEffect(self, champion, time):
+        # champion.aspd.add  -= self.addition
+        return True
+
+    def update(self, champion, time):
+        # NOTE: thsi will get fucked up with frame time
+        if time <= self.wearoff_time and self.active:
+            champion.aspd.add -= self.amount_to_decrease
+            self.addition -= self.amount_to_decrease  
+        if time > self.wearoff_time and self.addition > 0:
+            champion.aspd.add -= self.addition
+            self.addition = 0
+        super().update(champion, time)
+
 class ASModifier(Status):
     # increase AS by %
     # NOTE: does not work with stacking

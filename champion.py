@@ -195,7 +195,7 @@ class Champion(object):
         self.doAttack(newAttack, items, time)
 
         # some wiggle room for managen since you get mana while it's in air
-        if self.manalockTime <= time + 0.1 and generateMana == True:
+        if self.manalockTime <= time and generateMana == True:
             self.curMana += self.manaPerAttack.stat
         for item in items:
             item.ability("postAttack", time, self)

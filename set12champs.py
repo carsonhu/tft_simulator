@@ -245,7 +245,7 @@ class Olaf(Champion):
 class Nilah(Champion):
     def __init__(self, level):
         hp= 700
-        atk = 50
+        atk = 55
         curMana = 0
         fullMana = 60
         aspd = .8
@@ -355,7 +355,7 @@ class Tristana(Champion):
         self.castTime = .7
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [3.35, 3.4, 3.5]
+        adScale = [3.6, 3.6, 3.6]
         abilityScale = [50, 70, 110]
         return abilityScale[level - 1] * (AP) + adScale[level - 1] * AD
 
@@ -568,7 +568,7 @@ class Bard(Champion):
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
-        abilityScale = [110, 165, 255]
+        abilityScale = [105, 160, 245]
         return abilityScale[level - 1] * (AP)
 
     def performAbility(self, opponents, items, time):
@@ -652,11 +652,11 @@ class Ahri(Champion):
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
-        abilityScale = [200, 300, 460]
+        abilityScale = [230, 345, 520]
         return abilityScale[level - 1] * (AP)
 
     def trueDmgAbilityScaling(self, level, AD, AP):
-        abilityScale = [13, 20, 30]
+        abilityScale = [15, 25, 35]
         return abilityScale[level - 1] * (AP)
 
     def performAbility(self, opponents, items, time):

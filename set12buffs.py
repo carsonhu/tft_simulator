@@ -55,7 +55,7 @@ class Frost(Buff):
         # params is number of stacks
         super().__init__("Frost " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {3: 16, 5: 35, 7: 50, 9: 90}
+        self.scaling = {3: 16, 5: 40, 7: 55, 9: 90}
     def performAbility(self, phase, time, champion, input_=0):
         champion.atk.addStat(self.scaling[self.level])
         champion.ap.addStat(self.scaling[self.level])
@@ -67,9 +67,9 @@ class Hunter(Buff):
         # params is number of stacks
         super().__init__("Hunter " + str(level), level, params,
                          phases=["preCombat", "onUpdate"])
-        self.scaling = {0: 0, 2: 15, 4: 40, 6: 70}
+        self.scaling = {0: 0, 2: 15, 4: 40, 6: 65}
         self.as_scaling = {0: 0, 2: 0, 4: 0, 6: 20}
-        self.takedownScaling = {0: 0, 2: 20, 4: 30, 6: 40}
+        self.takedownScaling = {0: 0, 2: 20, 4: 30, 6: 35}
         # time for first takedown
         self.has_activated = False
     def performAbility(self, phase, time, champion, input_=0):
@@ -113,7 +113,7 @@ class Blaster(Buff):
         super().__init__("Blaster " + str(level), level, params,
                          phases=["preCombat", "preAbility"])
         self.scaling = {0: 0, 2: .15, 4: .35, 6: .6}
-        self.burstScaling = {0: 0, 2: .15, 4: .25, 6: .4}
+        self.burstScaling = {0: 0, 2: .15, 4: .3, 6: .4}
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             champion.dmgMultiplier.addStat(self.scaling[self.level])
@@ -208,7 +208,7 @@ class ArcanaXerath(Buff):
         # params is number of three-stars
         super().__init__("Arcana(Xerath) " + str(level), level, params,
                          phases=["onDealSpellDamage"])
-        self.scaling = {0: 0, 2: .02, 3: .025, 4: .045, 5: .07}
+        self.scaling = {0: 0, 2: .02, 3: .03, 4: .045, 5: .07}
         self.extraBuff(params)
     def performAbility(self, phase, time, champion, input_=0):
         true_dmg = self.scaling[self.level] * input_
@@ -279,7 +279,7 @@ class Chrono(Buff):
     def __init__(self, level=1, params=0):
         # vayne bolts inflicts status "Silver Bolts"
         super().__init__("Chrono " + str(level), level, params, phases=["preCombat", "onUpdate"])
-        self.ap_scaling = {0: 0, 2: 20, 4: 35, 6: 35}
+        self.ap_scaling = {0: 0, 2: 20, 4: 55, 6: 35}
         self.as_scaling = {0: 0, 2: 0, 4: 0, 6: 60}
         self.baseBuff = 15
         self.proc_time = 10
@@ -495,23 +495,27 @@ class SmolderUlt(Buff):
             champion.ultAutos -= 1
             if champion.ultAutos == 0:
                 champion.aspd.addStat(-50)
-                champion.manalockTime = time
+                champion.manalockTime = time + .01
         return 0
 
 class CassUlt(Buff):
     levels = [1]
     def __init__(self, level=1, params=0):
         # params is number of stacks
-        super().__init__("Witch Fang", level, params, phases=["postAttack"])
+        super().__init__("Witch Fang", level, params, phases=["preAttack"])
     def performAbility(self, phase, time, champion, input_=0):
         if champion.ultAutos > 0:
-            champion.multiTargetSpell(champion.opponents,
-                                      champion.items, time,
-                                      1, champion.abilityScaling,
-                                      'magical')
+            # champion.multiTargetSpell(champion.opponents,
+            #                           champion.items, time,
+            #                           1, champion.abilityScaling,
+            #                           'magical')
+            input_.canOnHit = True
+            input_.canCrit = champion.canSpellCrit
+            input_.attackType = 'magical'
+            input_.scaling = champion.abilityScaling
             champion.ultAutos -= 1
             if champion.ultAutos == 0:
-                champion.manalockTime = time
+                champion.manalockTime = time + .01
         return 0
 
 
@@ -569,7 +573,7 @@ class Mage(Buff):
     levels = [0, 3, 5, 7, 10]
     def __init__(self, level, params=0):
         super().__init__("Mage " + str(level), level, params, phases=["preCombat", "postAbility"])
-        self.scaling = {0: 0, 3: .85, 5: .95, 7: 1.15, 10: 2}
+        self.scaling = {0: 0, 3: .85, 5: .95, 7: 1.1, 10: 2}
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
             champion.ap.mult = self.scaling[self.level]

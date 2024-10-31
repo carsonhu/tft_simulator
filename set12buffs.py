@@ -594,7 +594,7 @@ class DejaVu(Buff):
         if phase == "preCombat":
             champion.manaPerAttack.addStat(15)
         if phase == "preAttack":
-            champion.ap.addStat(8)
+            champion.ap.addStat(5)
         return 0
 
 class AsheUlt(Buff):

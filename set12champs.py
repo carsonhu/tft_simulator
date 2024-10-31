@@ -383,7 +383,7 @@ class Galio(Champion):
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
-        daeja_amplifier = 2.3
+        daeja_amplifier = 2.25
         abilityScale = [50, 75, 115]
         return abilityScale[level - 1] * (AP) * daeja_amplifier
 

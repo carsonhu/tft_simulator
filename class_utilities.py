@@ -1,18 +1,30 @@
 # This is for commonly used functions in fated/snipers
 
-import set12_streamlit_snipers
+import set13_streamlit_snipers
 import matplotlib.pyplot as plt
 import streamlit as st
-import set12buffs
-import set12champs
-import set12items
-from set12buffs import *
-from set12champs import *
-from set12items import *
+import set13buffs
+import set13champs
+import set13items
+from set13buffs import *
+from set13champs import *
+from set13items import *
 import pandas as pd
 import numpy as np
 import itertools
 import utils
+
+def anomaly_bar(anomaly_list, default_item='NoBuff'):
+    st.header("Anomaly")
+    # item_cols = st.columns([2, 1])
+    index = 0
+    if default_item in anomaly_list:
+        index = anomaly_list.index(default_item)    
+
+    anomaly = st.selectbox(
+        'Anomaly {}'.format(1),
+         anomaly_list, key="Anomaly {}".format(1), index=index)
+    return anomaly
 
 def buff_bar(buff_list, num_buffs=1, max_buffs=4, starting_buffs=[], default_item='NoBuff'):
     """Buff Bar: Code for displaying the Buffs input list:
@@ -45,9 +57,9 @@ def buff_bar(buff_list, num_buffs=1, max_buffs=4, starting_buffs=[], default_ite
         with item_cols[1]:
             buff1level = st.selectbox(
             'Level',
-             utils.class_for_name('set12buffs', buff1).levels, key="Buff lvl {}".format(n))
+             utils.class_for_name('set13buffs', buff1).levels, key="Buff lvl {}".format(n))
         with item_cols[2]:
-            extraParams = utils.class_for_name('set12buffs', buff1).extraParameters()
+            extraParams = utils.class_for_name('set13buffs', buff1).extraParameters()
             if extraParams != 0:
                 buff1Extra = st.number_input(extraParams["Title"],
                                              min_value=extraParams["Min"],
@@ -255,12 +267,15 @@ def first_takedown(key, champ):
 
 def add_items(champ, buffs, add_noitem=False):
   if item != 'NoItem' or add_noitem:
-    champ.items.append(utils.class_for_name('set12items', item)())
+    champ.items.append(utils.class_for_name('set13items', item)())
 
 def add_buffs(champ, buffs, add_noitem=False):
   for buff, level, extraParams, in buffs:
     if buff != 'NoBuff' or add_noitem:
-      champ.items.append(utils.class_for_name('set12buffs', buff)(level, extraParams))
+      champ.items.append(utils.class_for_name('set13buffs', buff)(level, extraParams))
+
+def add_anomaly(champ, anomaly):
+  champ.items.append(utils.class_for_name('set13anomalies', anomaly)(1, []))
 
 
 
@@ -288,6 +303,6 @@ def champ_selector(champ_list):
 
     
 
-  new_champ = utils.class_for_name('set12champs', champ)(champlevel)
+  new_champ = utils.class_for_name('set13champs', champ)(champlevel)
   return new_champ
 

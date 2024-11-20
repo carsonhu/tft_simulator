@@ -6,7 +6,7 @@ offensive_craftables = ['Rabadons', 'Bloodthirster', 'HextechGunblade', 'Guinsoo
                         'Archangels', 'HoJ', 'Guardbreaker', 'GuardbreakerNoGuard', 'InfinityEdge', 'LastWhisper',
                         'Shojin', 'Titans', 'GS', 'GSNoGiant', 'Nashors',
                         'RunaansHurricane', 'Deathblade', 'QSS', 'JeweledGauntlet', 'Red', 'Shiv',
-                        'Blue', 'Morellos', 'FaerieQueensCrown']
+                        'Blue', 'Morellos']
 
 artifacts = ['InfinityForce', 'Fishbones', 'RFC', 'Mittens', 'GamblersBlade',
              'WitsEndStage2', 'WitsEndStage3', 'WitsEndStage4',
@@ -116,9 +116,10 @@ class Guardbreaker(Item):
 
 class GuardbreakerNoGuard(Item):
     def __init__(self):
-        super().__init__("Guardbreaker (no shield)", crit=20, ap=10, aspd=20, has_radiant=True, phases=None)
+        super().__init__("Guardbreaker (no shield)", crit=20, ap=10, aspd=20, has_radiant=True, phases=["preCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
+        champion.dmgMultiplier.add += .1
         return 0
 
 class InfinityEdge(Item):
@@ -213,7 +214,7 @@ class RunaansHurricane(Item):
 
 class Deathblade(Item):
     def __init__(self):
-        super().__init__("Deathblade", ad=50, has_radiant=True, phases="preCombat")
+        super().__init__("Deathblade", ad=55, has_radiant=True, phases="preCombat")
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.dmgMultiplier.add += .08
@@ -223,8 +224,8 @@ class QSS(Item):
     def __init__(self):
         super().__init__("Quicksilver", aspd=30, crit=20, phases="onUpdate")
         self.nextAS = 2
-        self.asGain = 4
-        self.procs_left = 7
+        self.asGain = 3
+        self.procs_left = 9
 
     def performAbility(self, phase, time, champion, input_=0):
         if time >= self.nextAS and self.procs_left > 0:
@@ -286,18 +287,21 @@ class GS(Item):
 
     def performAbility(self, phase, time, champion, input_):
         # input_ is target
+        champion.dmgMultiplier.add += .05
         if len(champion.opponents) > 0:
             vsGiants = champion.opponents[0].hp.stat >= 1750
             if vsGiants:
-                champion.dmgMultiplier.add += .25
+                champion.dmgMultiplier.add += .2
         return 0
 
 class GSNoGiant(Item):
     # needs reworking
     def __init__(self):
-        super().__init__("Giant Slayer (no Giant)", aspd=10, ad=25, ap=25, has_radiant=True, phases=None)
+        super().__init__("Giant Slayer (no Giant)", aspd=10, ad=25, ap=25, has_radiant=True, phases="preCombat")
 
     def performAbility(self, phase, time, champion, input_):
+        champion.dmgMultiplier.add += .05
+
         return 0
 
 class Bramble(Item):
@@ -306,28 +310,20 @@ class Bramble(Item):
 
 class Blue(Item):
     def __init__(self):
-        super().__init__("Blue Buff", mana=20, ap=15, ad=15, has_radiant=True, phases=["preCombat", "onUpdate"])
+        super().__init__("Blue Buff", mana=30, ap=15, ad=15, has_radiant=True, phases=["postAbility", "onUpdate"])
         self.has_activated = False
 
     def performAbility(self, phase, time, champion, input_=0):
         # blue buff is the only multiplier so we just to flat -10
-        if phase == "preCombat":
-            champion.fullMana.add = -10
-            champion.curMana = min(champion.curMana, champion.fullMana.stat)
+        if phase == "postAbility":
+            champion.addMana(10)
+            # champion.fullMana.add = -10
+            # champion.curMana = min(champion.curMana, champion.fullMana.stat)
 
         if phase == "onUpdate":
             if time > champion.first_takedown and not self.has_activated:
                 champion.dmgMultiplier.add += .05 # we actually want this only after 5s or so
                 self.has_activated = True
-        return 0
-
-### FAERIE CROWN
-
-class FaerieQueensCrown(Item):
-    def __init__(self):
-        super().__init__("FaerieQueen's Crown", ad=30, ap=30, phases=None)
-
-    def performAbility(self, phase, time, champion, input_=0):
         return 0
 
 ### ARTIFACTS

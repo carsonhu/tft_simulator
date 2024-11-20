@@ -29,10 +29,15 @@ class AD(Stat):
     # AD has different behavior for adding stat
     def __init__(self, base, multModifier, addModifier):
         super().__init__(base, multModifier, addModifier)
+        self.addMultiplier = 1 # used for Attack Expert
 
     def addStat(self, add):
         # if u get 6 AD, mult is +6
         self.mult += add/100
+
+    @property
+    def stat(self):
+        return (1 + (self.mult - 1) * self.addMultiplier) * (self.base + self.add)
 
 class Aspd(Stat):
     # AS needs a slightly different calc and a cap
@@ -86,6 +91,7 @@ class Champion(object):
         self.armor = Stat(armor, 1, 0)
         self.mr = Stat(mr, 1, 0)
         self.manaPerAttack = Stat(10, 1, 0)
+        self.manaGainMultiplier = Stat(1, 1, 0)
         self.level = level
         self.dmgMultiplier = Stat(1, 1, 0)
         self.crit = Stat(.25, 1, 0)
@@ -154,10 +160,10 @@ class Champion(object):
     def canAttack(self, time):
         return time >= self.nextAttackTime
 
-    def addMana(self, time, amount):
+    def addMana(self, amount):
         # if time > self.manalockTime:
         #     # may need to adjust this
-        self.curMana += amount
+        self.curMana += amount * self.manaGainMultiplier.stat
 
     def abilityScaling(self, level):
         # Abstract method
@@ -196,7 +202,7 @@ class Champion(object):
 
         # some wiggle room for managen since you get mana while it's in air
         if self.manalockTime <= time and generateMana == True:
-            self.curMana += self.manaPerAttack.stat
+            self.addMana(self.manaPerAttack.stat)
         for item in items:
             item.ability("postAttack", time, self)
     
@@ -245,6 +251,8 @@ class Champion(object):
         # just an extra method for abilities which attack for a % of your AD,
         # like Runaans
         # Probably does result in some niche buggy interactions
+        print("Attack: ", attack)
+        print("Multiplier:", multiplier)
         return (attack + multiplier.add) * multiplier.mult
 
     def doAttack(self, attack, items, time):

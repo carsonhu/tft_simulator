@@ -104,6 +104,7 @@ class Zoe(Champion):
         self.default_traits = ['Rebel', 'Sorcerer']
         self.castTime = .7
         self.targets = [4, 4, 8]
+        self.notes = "AFAIK Zoe spell hits 5 targets: Target -> Bounce -> target -> bounce -> target"
         # technically her next auto is amped but it's literally the same thing
 
     def abilityScaling(self, level, AD, AP):

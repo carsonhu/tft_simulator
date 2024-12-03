@@ -131,6 +131,7 @@ class Malzahar(Champion):
         self.castTime = .5
         self.num_targets = 5
         self.buff_duration = 999
+        self.notes = "No shred yet / automata yet"
         # technically her next auto is amped but it's literally the same thing
 
     def abilityScaling(self, level, AD, AP):

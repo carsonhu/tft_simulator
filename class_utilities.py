@@ -259,11 +259,43 @@ def first_takedown(key, champ):
         Champion: a champion with the requested hp, armor, and mr
     """
 
-    st.header("First takedown")
+    # st.subheader("First takedown")
     first_takedown = st.number_input('Time of first takedown',
                                      min_value=1, max_value=30,
                                      value=5, key=key)
     champ.first_takedown = first_takedown
+
+def num_traits(key, champ):
+    """num traits
+    
+    Args:
+        key (string): unique key for streamlit
+    
+    Returns:
+        Champion: a champion with the requested hp, armor, and mr
+    """
+
+    # st.subheader("Number of traits")
+    traits = st.number_input('Number of active traits',
+                                     min_value=0, max_value=12,
+                                     value=6, key=key)
+    champ.num_traits = traits
+
+def rebel_time(key, champ):
+    """num traits
+    
+    Args:
+        key (string): unique key for streamlit
+    
+    Returns:
+        Champion: a champion with the requested hp, armor, and mr
+    """
+
+    # st.subheader("Number of traits")
+    time = st.number_input('Rebel proc time',
+                                     min_value=1, max_value=30,
+                                     value=5, key=key)
+    champ.rebel_time = time
 
 def add_items(champ, buffs, add_noitem=False):
   if item != 'NoItem' or add_noitem:

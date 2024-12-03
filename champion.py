@@ -118,9 +118,37 @@ class Champion(object):
         # self.ie = False # calculations for IE
 
         self.first_takedown = 5 # time of first takedown
-
+        self.num_traits = 0
+        self.rebel_time = 7 # time of rebel proc
+        
         self.numAttacks = 0
         self.numCasts = 0
+
+    def hashFunction(self):
+        items_tuple = tuple(item.hashFunction() for item in self.items)
+        stat_tuple = (self.name,
+                     self.hp.stat,
+                     self.atk.stat,
+                     self.aspd.stat,
+                     self.ap.stat,
+                     self.armor.stat,
+                     self.mr.stat,
+                     self.manaPerAttack.stat,
+                     self.manaGainMultiplier.stat,
+                     self.level,
+                     self.dmgMultiplier.stat,
+                     self.crit.stat,
+                     self.critDmg.stat,
+                     self.canCrit,
+                     self.canSpellCrit,
+                     self.castTime,
+                     self.first_takedown,
+                     self.num_traits,
+                     self.rebel_time)
+        return (items_tuple + stat_tuple)
+        
+    def __hash__(self):
+        return hash(self.hashFunction())
 
     def applyStatus(self, status, champion, time, duration, params=0):
         """ Apply status to self.
@@ -251,8 +279,7 @@ class Champion(object):
         # just an extra method for abilities which attack for a % of your AD,
         # like Runaans
         # Probably does result in some niche buggy interactions
-        print("Attack: ", attack)
-        print("Multiplier:", multiplier)
+
         return (attack + multiplier.add) * multiplier.mult
 
     def doAttack(self, attack, items, time):
@@ -362,6 +389,7 @@ class Champion(object):
             baseCritDmg *= self.critDamage()
         baseDmg *= self.dmgMultiplier.stat
         baseCritDmg *= self.dmgMultiplier.stat
+
         for opponent in opponents[0:targets]:
             self.doDamage(opponent, items, self.crit.stat, baseCritDmg, baseDmg, type, time, is_spell=True)    
 

@@ -7,6 +7,7 @@ import csv
 from collections import deque, defaultdict
 from set13champs import *
 from set13buffs import *
+from champion import Champion
 import set13items
 import numpy as np
 import itertools
@@ -14,6 +15,26 @@ import xlsxwriter
 import streamlit as st
 import pandas as pd
 import utils
+
+class ObjectWrapper:
+    def __init__(self, champion):
+        self.obj = champion
+        self.hash = champion.__hash__()
+
+# class ObjectListWrapper:
+#     def __init__(self, object_list):
+#         self.object_list = object_list
+#         self.hash = ()
+#         for obj in object_list:
+#             self.hash += obj.hashFunction()
+#         st.write("Hash raw: ", self.hash)
+#         self.hash = hash(self.hash)
+#         st.write("Hash: ", self.hash)
+
+
+def hash_func(obj: ObjectWrapper) -> str:
+    return obj.hash  # or any other value that uniquely identifies the object
+
 
 
 class Simulator(object):
@@ -349,10 +370,19 @@ def radiantRefactor(champions, opponent, itemList, t):
     # to get the radiants
     return 0
 
-def doExperimentOneExtra(champion, opponent, itemList, buffList, t):
-    # this is done with champ already with a set of items
+# def hash_func(obj: Champion) -> str:
+#     return obj.name  # or any other value that uniquely identifies the object
+
+@st.cache_data(hash_funcs={ObjectWrapper: hash_func})
+def doExperimentOneExtraWrapped(champion: ObjectWrapper, opponent: ObjectWrapper,
+                                _itemList,
+                                _buffList, t):
     simulator = Simulator()
     simList = []
+    champion = champion.obj
+    opponent = opponent.obj
+    itemList = _itemList
+    buffList = _buffList
 
     for item in itemList:
       champ = copy.deepcopy(champion)
@@ -369,6 +399,32 @@ def doExperimentOneExtra(champion, opponent, itemList, buffList, t):
       simList.append({"Champ": champ, "Extra": buff, "Results": results})
 
     return simList
+
+# @st.cache_data(hash_funcs={Champion: hash_func})
+def doExperimentOneExtra(champion: Champion, opponent: Champion, itemList, buffList, t):
+    champ_obj = ObjectWrapper(champion)
+    opponent_obj = ObjectWrapper(opponent)
+
+    return doExperimentOneExtraWrapped(champ_obj, opponent_obj, itemList, buffList, t)
+    # this is done with champ already with a set of items
+    # simulator = Simulator()
+    # simList = []
+
+    # for item in itemList:
+    #   champ = copy.deepcopy(champion)
+    #   results = simulator.simulate([copy.deepcopy(item)], [], champ,
+    #     [copy.deepcopy(opponent) for i in range(8)], t)
+    #   simList.append({"Champ": champ, "Extra": item, "Results": results})
+    # for buff in buffList:
+    #   champ = copy.deepcopy(champion)
+    #   equal_buffs = [champ_buff for champ_buff in champ.items if champ_buff.name.split(" ")[0] == buff.name.split(" ")[0]] 
+    #   for equal_buff in equal_buffs:
+    #     champ.items.remove(equal_buff)
+    #   results = simulator.simulate([], [copy.deepcopy(buff)], champ,
+    #                                [copy.deepcopy(opponent) for i in range(8)], t)
+    #   simList.append({"Champ": champ, "Extra": buff, "Results": results})
+
+    # return simList
 
 def createUnitDPSTable(simLists):
   entries = []  

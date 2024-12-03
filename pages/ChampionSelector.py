@@ -59,12 +59,19 @@ anomalies = sorted(set13buffs.anomalies + set13buffs.no_buff)
 champ_before_sims = None
 
 with st.sidebar:
+
     champ = class_utilities.champ_selector(champ_list)
 
     if hasattr(champ, 'num_targets'):
         targets = st.slider(
         'number of targets', min_value=1, max_value=max(3, champ.num_targets+1), value=champ.num_targets)
         champ.num_targets = targets
+
+    with st.popover("Extra options"):
+        class_utilities.first_takedown("Takedown", champ)
+        class_utilities.num_traits("Num traits", champ)
+        class_utilities.rebel_time("Rebel", champ)
+
 
     st.header("Global Items")
 
@@ -92,7 +99,6 @@ with st.sidebar:
 
     enemy = class_utilities.enemy_list("Champ selector")
 
-    class_utilities.first_takedown("Takedown", champ)
 
     # Add items to Champion
     for item in items:

@@ -74,6 +74,17 @@ class AvariceIncarnate(Buff):
         champion.dmgMultiplier.addStat(.4)
         return 0
 
+class Freestyling(Buff):
+    levels = [1]
+    def __init__(self, level, params):
+        # params is number of stacks
+        super().__init__("Freestyling", level, params,
+                         phases=["preCombat"])
+        self.scaling = .045
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.dmgMultiplier.addStat(self.scaling * champion.num_traits)        
+        return 0
+
 class IntoTheUnknown(Buff):
     levels = [1]
     def __init__(self, level, params):
@@ -84,6 +95,17 @@ class IntoTheUnknown(Buff):
     def performAbility(self, phase, time, champion, input_=0):
         champion.atk.addStat(self.scaling)
         champion.ap.addStat(self.scaling)
+        return 0
+
+class CullTheWeak(Buff):
+    levels = [1]
+    def __init__(self, level, params):
+        # params is number of stacks
+        super().__init__("Cull the Weak (assume 50% hp)", level, params,
+                         phases=["preCombat"])
+        self.scaling = .5
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.crit.addStat(self.scaling)
         return 0
 
 class Hypervelocity(Buff):
@@ -101,6 +123,22 @@ class Hypervelocity(Buff):
             champion.aspd.addStat(self.scaling)
         return 0
 
+class StrengthTraining(Buff):
+    levels = [1]
+    def __init__(self, level, params):
+        # params is number of stacks
+        super().__init__("StrengthTraining", level, params,
+                         phases=["preCombat", "preAttack"])
+        self.base_scaling = 20
+        self.scaling = 4
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.atk.addStat(self.base_scaling)
+        elif phase == "preAttack":
+            if champion.numAttacks % 3 == 0:
+                champion.atk.addStat(self.scaling)
+        return 0
+
 class MagicTraining(Buff):
     levels = [1]
     def __init__(self, level, params):
@@ -113,7 +151,7 @@ class MagicTraining(Buff):
         if phase == "preCombat":
             champion.ap.addStat(self.base_scaling)
         elif phase == "preAbility":
-            champion.ap.addStat(self.scaling * (champion.fullMana.stat / 15))
+            champion.ap.addStat(self.scaling * (champion.fullMana.stat / 20))
         return 0
 
 
@@ -136,6 +174,20 @@ class OneThousandCuts(Buff):
             self.stacsk = 0
             self.current_dmg = self.base_scaling
         return 0
+
+# class Knockout(Buff):
+#     levels = [1]
+#     def __init__(self, level, params):
+#         # params is number of stacks
+#         super().__init__("Knockout", level, params,
+#                          phases=["preCombat", "postAbility", "preAttack"])
+#         self.enhanced_active = False
+#     def performAbility(self, phase, time, champion, input_=0):
+#         targets = 2
+#         base_dmg = self.scaling * champion.atk.stat
+#         for i in range(targets):
+#             champion.doDamage(champion.opponents[0], [], 0, base_dmg, base_dmg, 'physical', time)
+#         return 0
 
 class TitanicStrikes(Buff):
     levels = [1]

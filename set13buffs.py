@@ -22,11 +22,13 @@ file_path = "set13anomalies.py"
 anomalies = get_classes_from_file(file_path)
 
 class_buffs = ['Sorcerer', 'FormSwapper', 'Family', 'Visionary', 'Sniper', 
-               'Quickstriker', 'Dominator', 'Ambusher']
+               'Quickstriker', 'Dominator', 'Ambusher', 'Rebel',
+               'Conquerer', 'EmissaryNami', 'EmissaryTrist',
+               'PitFighter']
 
-augments = ['BlossomingLotusI', 'BlossomingLotusII',
-            'ClockworkAccelerator', 'JeweledLotusII',
-            'JeweledLotusIII', 'FinalAscension', 'Spellblades', 'Shred30']
+augments = ['ClockworkAccelerator', 'ManaflowI', 'ManaflowII', 'Shred30',
+            'BlazingSoulI', 'BlazingSoulII', 'BadLuckProtection',
+            'CalculatedEnhancement']
 
 
 
@@ -55,6 +57,19 @@ class Buff(Item):
     def extraParameters():
         return 0
 
+    def hashFunction(self):
+        init_tuple = (self.name, str(self.level))
+        if isinstance(self.params, int):
+            param_tuple = (self.params,)
+        else:
+            param_tuple = tuple(self.params)
+        # for param in self.params:
+        #     param_tuple += (param)
+        return (init_tuple + param_tuple)
+
+    def __hash__(self):
+        return hash(self.hashFunction())
+
 class NoBuff(Buff):
     levels = [0]
     def __init__(self, level, params):
@@ -76,6 +91,19 @@ class Sorcerer(Buff):
         champion.ap.addStat(self.base_scaling)
         champion.ap.addStat(self.scaling[self.level])
         return 0
+
+class PitFighter(Buff):
+    levels = [0, 2, 4, 6, 8]
+    def __init__(self, level, params):
+        # params is number of stacks
+        super().__init__("Pit Fighter " + str(level), level, params,
+                         phases=["onDealDamage"])
+        self.scaling = {2: .06, 4: .12, 6: .2, 8: .5}
+    def performAbility(self, phase, time, champion, input_=0):
+        true_dmg = self.scaling[self.level] * input_
+        champion.doDamage(champion.opponents[0], [], 0,
+                          true_dmg, true_dmg, 'true', time)
+        return input_
 
 class Visionary(Buff):
     levels = [0, 2, 4, 6, 8]
@@ -175,6 +203,87 @@ class Ambusher(Buff):
         champion.critDmg.addStat(self.scaling[self.level])
         champion.canSpellCrit = True
         return 0
+
+
+class Emissary(Buff):
+    levels = [0, 1, 4]
+    def __init__(self, level, params, emissary_name):
+        # params is number of stacks
+        super().__init__("Emissary " + str(level), level, params,
+                         phases=["preCombat"])
+        self.emissary_name = emissary_name
+        self.is_emissary = 0
+        self.extraBuff(params)
+
+    def extraParameters():
+        # defining the parameters for the extra shit
+        return {"Title": "Is Emissary",
+                "Min": 0,
+                "Max": 1,
+                "Default": 1}
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if self.emissary_name == "Nami" or self.level == 4:
+            champion.manaPerAttack.addStat(2)
+        if self.emissary_name == "Tristana" or self.level == 4:
+            champion.aspd.addStat(6 * champion.level)
+        if self.level == 4 and self.is_emissary:
+            champion.aspd.addStat(20)
+        return 0
+
+    def extraBuff(self, is_emissary):
+        self.is_emissary = is_emissary
+
+class EmissaryNami(Emissary):
+    def __init__(self, level, params):
+        super().__init__(level, params, "Nami")
+
+class EmissaryTrist(Emissary):
+    def __init__(self, level, params):
+        super().__init__(level, params, "Tristana")
+
+class Rebel(Buff):
+    levels = [0, 3, 5, 7]
+    def __init__(self, level, params):
+        # params is number of stacks
+        super().__init__("Rebel " + str(level), level, params,
+                         phases=["onUpdate"])
+        self.atk_scaling = {0: 0, 3: 15, 5: 30, 7: 45}
+        self.ap_scaling = {0: 0, 3: 15, 5: 30, 7: 45}
+        self.buff_duration = 5
+        self.aspd_bonus = 60
+    def performAbility(self, phase, time, champion, input_=0):
+        if time > champion.rebel_time:
+            champion.atk.addStat(self.atk_scaling[self.level])
+            champion.ap.addStat(self.ap_scaling[self.level])
+            champion.applyStatus(status.ASModifier("Rebel"),
+            champion, time, self.buff_duration, self.aspd_bonus)
+            champion.rebel_time = 999
+        return 0
+
+class Conquerer(Buff):
+    levels = [0, 2, 4, 6, 9]
+    def __init__(self, level, params):
+        # params is number of stacks
+        super().__init__("Conquerer " + str(level), level, params,
+                         phases=["preCombat"])
+        self.scaling = {0: 0, 2: 16, 4: 25, 6: 40, 9: 100}
+        self.chests = 0
+        self.extraBuff(params)
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.aspd.addStat(self.scaling[self.level] * (1 + .03 * self.chests))
+        return 0
+
+    def extraParameters():
+        # defining the parameters for the extra shit
+        return {"Title": "War Chests",
+                "Min": 0,
+                "Max": 15,
+                "Default": 3}
+
+    def extraBuff(self, chests):
+        self.chests = chests
+
 
 class Frost(Buff):
     levels = [0, 3, 5, 7, 9]
@@ -582,6 +691,27 @@ class ZeriUlt(Buff):
             self.stacks = 0
         return 0
 
+class TwitchUlt(Buff):
+    levels = [1]
+    def __init__(self, level=1, params=0):
+        # params is number of stacks
+        super().__init__("Spray and Pray", level, params, phases=["preAttack"])
+    def performAbility(self, phase, time, champion, input_=0):
+        # BUG: currently does not work with Xerath Arcana
+
+        # input is attack
+        if champion.ultActive and champion.ultAutos > 0:
+            input_.canOnHit = True
+            input_.canCrit = champion.canSpellCrit
+            input_.attackType = 'physical'
+            input_.scaling = champion.abilityScaling
+            input_.numTargets = champion.numTargets
+            champion.ultAutos -= 1
+            if champion.ultAutos == 0:
+                champion.aspd.addStat(-1 * champion.aspd_bonus)
+                champion.manalockTime = time + .01
+        return 0
+
 class SmolderUlt(Buff):
     levels = [1]
     def __init__(self, level=1, params=0):
@@ -620,57 +750,6 @@ class CassUlt(Buff):
             champion.ultAutos -= 1
             if champion.ultAutos == 0:
                 champion.manalockTime = time + .01
-        return 0
-
-
-class Baboom(Buff):
-    levels = [1]
-    def __init__(self, level, params):
-        # params is number of stacks
-        super().__init__("Baboom " + str(level), level, params, phases=["preAbility"])
-        self.scaling = {1: .90}
-        self.castCounter = 0
-    def performAbility(self, phase, time, champion, input_=0):
-        self.castCounter += 1
-        if self.castCounter % 2 == 0:
-            champion.applyStatus(status.DmgMultiplierModifier("Baboom"),
-                                 champion, time, 2,
-                                 self.scaling[self.level])
-        return 0
-
-class Multistriker(Buff):
-    levels = [0, 3, 5, 7, 9]
-    def __init__(self, level=0, params=0):
-        # vayne bolts inflicts status "Silver Bolts"
-        super().__init__("Multistriker " + str(level), level, params, phases=["postAttack"])
-        self.scaling = {0: 0, 3: .25, 5: .65, 7: .8, 9: 1}
-        self.multistrikerActive = False
-        self.multistrikerAutoCount = 0
-        self.auto_counter = 0
-
-    def performAbility(self, phase, time, champion, input_=0):
-
-        # if multistrike not active:
-        # option 1: edit attackTime() function for the next 2 attacks
-
-
-        if phase == "postAttack":
-            if not self.multistrikerActive:
-                self.auto_counter += self.scaling[self.level]
-                if self.auto_counter >= 1:
-                    # champion.aspd.addStat(300)
-                    champion.aspd.mult = 4
-                    champion.aspd.as_cap = 100
-                    self.multistrikerAutoCount = 0
-                    self.multistrikerActive = True
-                    self.auto_counter -= 1
-            elif self.multistrikerActive:
-                self.multistrikerAutoCount += 1
-                if self.multistrikerAutoCount == 2:
-                    self.multistrikerActive = False
-                    champion.aspd.mult = 1
-                    champion.aspd.as_cap = 5
-                    self.multistrikerAutoCount = 0
         return 0
 
 class Mage(Buff):
@@ -802,23 +881,90 @@ class BlossomingLotusII(Buff):
                 champion.crit.addStat(self.critBonus)
         return 0
 
-class Spellblades(Buff):
+class ManaflowI(Buff):
     levels=[1]
     def __init__(self, level=1, params=0):
         # vayne bolts inflicts status "Silver Bolts"
-        super().__init__("Spellblades", level, params, phases=["preAbility", "preAttack"])
-        self.enhancedAuto = False
-        self.dmgRatio = 120
+        super().__init__("Manaflow I", level, params, phases=["preCombat"])
+
         #self.chakramQueue = deque()
         # chakram[0]: number of chakrams
         # chakram[1]: time to end
     def performAbility(self, phase, time, champion, input_=0):
-        if phase == "preAbility":
-            self.enhancedAuto = True
-        elif phase == "preAttack":
-            if self.enhancedAuto:
-                champion.doDamage(champion.opponents[0], [], 0, champion.ap.stat * self.dmgRatio,
-                                  champion.ap.stat * self.dmgRatio, 'magical', time)
+        champion.manaPerAttack.addStat(2)
+        return 0
+
+class ManaflowII(Buff):
+    levels=[1]
+    def __init__(self, level=1, params=0):
+        # vayne bolts inflicts status "Silver Bolts"
+        super().__init__("Manaflow II", level, params, phases=["preCombat"])
+
+        #self.chakramQueue = deque()
+        # chakram[0]: number of chakrams
+        # chakram[1]: time to end
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.manaPerAttack.addStat(4)
+        return 0
+
+class CalculatedEnhancement(Buff):
+    levels=[1]
+    def __init__(self, level=1, params=0):
+        # vayne bolts inflicts status "Silver Bolts"
+        super().__init__("Calculated Enhancement", level, params, phases=["preCombat"])
+
+        #self.chakramQueue = deque()
+        # chakram[0]: number of chakrams
+        # chakram[1]: time to end
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.atk.addStat(35)
+        champion.ap.addStat(40)
+        return 0
+
+class BlazingSoulI(Buff):
+    levels=[1]
+    def __init__(self, level=1, params=0):
+        # vayne bolts inflicts status "Silver Bolts"
+        super().__init__("Blazing Soul I", level, params, phases=["preCombat"])
+
+        #self.chakramQueue = deque()
+        # chakram[0]: number of chakrams
+        # chakram[1]: time to end
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.aspd.addStat(20)
+        champion.ap.addStat(20)
+        return 0
+
+class BlazingSoulII(Buff):
+    levels=[1]
+    def __init__(self, level=1, params=0):
+        # vayne bolts inflicts status "Silver Bolts"
+        super().__init__("Blazing Soul II", level, params, phases=["preCombat"])
+
+        #self.chakramQueue = deque()
+        # chakram[0]: number of chakrams
+        # chakram[1]: time to end
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.aspd.addStat(30)
+        champion.ap.addStat(35)
+        return 0
+
+class BadLuckProtection(Buff):
+    levels=[1]
+    def __init__(self, level=1, params=0):
+        # vayne bolts inflicts status "Silver Bolts"
+        super().__init__("Bad Luck Protection", level, params, phases=["onUpdate"])
+
+        #self.chakramQueue = deque()
+        # chakram[0]: number of chakrams
+        # chakram[1]: time to end
+    def performAbility(self, phase, time, champion, input_=0):
+        if champion.canCrit or champion.canSpellCrit or champion.crit.base > 0:
+            champion.canCrit = False
+            champion.canSpellCrit = False
+            champion.atk.addStat(champion.crit.stat * 100)
+            champion.crit.base = 0
+            champion.crit.add = 0
 
         return 0
 
@@ -848,7 +994,7 @@ class ClockworkAccelerator(Buff):
     def __init__(self, level=1, params=0):
         # vayne bolts inflicts status "Silver Bolts"
         super().__init__("Clockwork Accelerator", level, params, phases=["onUpdate"])
-        self.asBonus = 9
+        self.asBonus = 10
         self.nextBonus = 3
 
         #self.chakramQueue = deque()

@@ -65,7 +65,7 @@ def buff_bar(buff_list, num_buffs=1, max_buffs=4, starting_buffs=[], default_ite
                                              min_value=extraParams["Min"],
                                              max_value=extraParams["Max"],
                                              value=extraParams["Default"],
-                                             key=extraParams["Title"])
+                                             key=extraParams["Title"] + str(n))
             else:
                 buff1Extra = st.number_input("(ignore)",
                                              min_value=0,
@@ -294,7 +294,7 @@ def rebel_time(key, champ):
     # st.subheader("Number of traits")
     time = st.number_input('Rebel proc time',
                                      min_value=1, max_value=30,
-                                     value=5, key=key)
+                                     value=7, key=key)
     champ.rebel_time = time
 
 def add_items(champ, buffs, add_noitem=False):

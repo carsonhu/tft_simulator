@@ -111,7 +111,6 @@ class Visionary(Buff):
         # params is number of stacks
         super().__init__("Visionary " + str(level), level, params,
                          phases=["preCombat"])
-        self.base_scaling = 10
         self.scaling = {2: .25, 4: .5, 6: .8, 8: 1}
     def performAbility(self, phase, time, champion, input_=0):
         champion.manaGainMultiplier.mult += self.scaling[self.level]
@@ -228,7 +227,7 @@ class Emissary(Buff):
         if self.emissary_name == "Tristana" or self.level == 4:
             champion.aspd.addStat(6 * champion.level)
         if self.level == 4 and self.is_emissary:
-            champion.aspd.addStat(20)
+            champion.dmgMultiplier.addStat(.2)
         return 0
 
     def extraBuff(self, is_emissary):

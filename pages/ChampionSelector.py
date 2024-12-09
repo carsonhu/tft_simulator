@@ -62,7 +62,7 @@ with st.sidebar:
 
     champ = class_utilities.champ_selector(champ_list)
 
-    if hasattr(champ, 'num_targets'):
+    if hasattr(champ, 'num_targets') and champ.num_targets > 0 :
         targets = st.slider(
         'number of targets', min_value=1, max_value=max(3, champ.num_targets+1), value=champ.num_targets)
         champ.num_targets = targets

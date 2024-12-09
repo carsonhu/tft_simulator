@@ -145,7 +145,7 @@ class MagicTraining(Buff):
         # params is number of stacks
         super().__init__("Magic Training", level, params,
                          phases=["preCombat", "preAbility"])
-        self.base_scaling = 20
+        self.base_scaling = 15
         self.scaling = 2
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "preCombat":
@@ -155,25 +155,25 @@ class MagicTraining(Buff):
         return 0
 
 
-class OneThousandCuts(Buff):
-    levels = [1]
-    def __init__(self, level, params):
-        # params is number of stacks
-        super().__init__("One Thousand Cuts (cap 10)", level, params,
-                         phases=["preAttack"])
-        self.base_scaling = 30
-        self.scaling = 15
-        self.stacks = 0
-        self.max_stacks = 10
-        self.current_dmg = self.base_scaling
-    def performAbility(self, phase, time, champion, input_=0):
-        champion.doDamage(champion.opponents[0], [], 0, self.current_dmg, self.current_dmg,'true', time)
-        self.current_dmg += self.scaling
-        self.stacks += 1
-        if self.stacks > self.max_stacks:
-            self.stacsk = 0
-            self.current_dmg = self.base_scaling
-        return 0
+# class OneThousandCuts(Buff):
+#     levels = [1]
+#     def __init__(self, level, params):
+#         # params is number of stacks
+#         super().__init__("One Thousand Cuts (cap 10)", level, params,
+#                          phases=["onAttack"])
+#         self.base_scaling = 30
+#         self.scaling = 12
+#         self.stacks = 0
+#         self.max_stacks = 10
+#         self.current_dmg = self.base_scaling
+#     def performAbility(self, phase, time, champion, input_=0):
+#         champion.doDamage(champion.opponents[0], [], 0, self.current_dmg, self.current_dmg,'true', time)
+#         self.current_dmg += self.scaling
+#         self.stacks += 1
+#         if self.stacks > self.max_stacks:
+#             self.stacsk = 0
+#             self.current_dmg = self.base_scaling
+#         return 0
 
 # class Knockout(Buff):
 #     levels = [1]
@@ -195,7 +195,7 @@ class TitanicStrikes(Buff):
         # params is number of stacks
         super().__init__("Titanic Strikes (2 targets)", level, params,
                          phases=["preAttack"])
-        self.scaling = .30
+        self.scaling = .40
     def performAbility(self, phase, time, champion, input_=0):
         targets = 2
         base_dmg = self.scaling * champion.atk.stat

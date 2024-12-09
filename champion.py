@@ -118,13 +118,16 @@ class Champion(object):
         # self.ie = False # calculations for IE
 
         self.first_takedown = 5 # time of first takedown
-        self.num_traits = 0
-        self.rebel_time = 7 # time of rebel proc
+        self.num_traits = 0 
+        self.rebel_time = 5 # time of rebel proc
         
+        self.num_targets = 0
+
         self.numAttacks = 0
         self.numCasts = 0
 
     def hashFunction(self):
+        # Hash to cache champion data
         items_tuple = tuple(item.hashFunction() for item in self.items)
         stat_tuple = (self.name,
                      self.hp.stat,
@@ -144,10 +147,12 @@ class Champion(object):
                      self.castTime,
                      self.first_takedown,
                      self.num_traits,
-                     self.rebel_time)
+                     self.rebel_time,
+                     self.num_targets)
         return (items_tuple + stat_tuple)
         
     def __hash__(self):
+        # used for caching
         return hash(self.hashFunction())
 
     def applyStatus(self, status, champion, time, duration, params=0):
@@ -228,7 +233,6 @@ class Champion(object):
         
         self.doAttack(newAttack, items, time)
 
-        # some wiggle room for managen since you get mana while it's in air
         if self.manalockTime <= time and generateMana == True:
             self.addMana(self.manaPerAttack.stat)
         for item in items:
@@ -265,6 +269,7 @@ class Champion(object):
                 # if they instant cast they shouldn't be manalocked
                 self.manalockTime = 0
             else:
+                # manalock duration is deprecated
                 self.manalockTime = max(time + self.manalockDuration,
                                     time + self.castTime)
             self.curMana = self.curMana - self.fullMana.stat + self.startingMana
@@ -284,12 +289,16 @@ class Champion(object):
 
     def doAttack(self, attack, items, time):
         # Activating onhits
+        # onAttack is currently unused
         if attack.canOnHit:
             for item in items:
                 item.ability("onAttack", time, self, attack.opponents)
+
+        # onCrit is currently unused
         if attack.canCrit:
             for item in items:
                 item.ability("onCrit", time, self, attack.opponents)
+                
         baseDmg = self.baseAtkDamage(attack.scaling(self.level, self.atk.stat,
                                      self.ap.stat), attack.multiplier)
         baseCritDmg = baseDmg
@@ -330,61 +339,14 @@ class Champion(object):
             # record (Time, Damage Dealt, current AS, current Mana)
             self.dmgVector.append((time, avgDmg, self.aspd.stat, self.curMana))
 
-    def multiTargetAttack(self, opponents, items, time, targets, scaling, type='physical', numAttacks=1):        
-        # for item in items:
-        #     item.ability("preAbility", time, self)
-        newAttack = Attack(opponents, Stat(0,1,0), 'physical', 1)
-        for a in range(numAttacks):
-            for item in items:
-                item.ability("preAttack", time, self, newAttack)            
-        # Activating onhits
-        # TODO: change this to just call doAttack
-
-        # it shouldn't active 'onattack'
-        # for item in items:
-        #     item.ability("onAttack", time, self, opponents[0])
-        baseDmg = scaling(self.level, self.atk.stat, self.ap.stat)
-        baseCritDmg = baseDmg
-        if self.canSpellCrit:
-            baseCritDmg *= self.critDamage()
-        baseDmg *= self.dmgMultiplier.stat
-        baseCritDmg *= self.dmgMultiplier.stat
-        for opponent in opponents[0:targets]:
-            self.doDamage(opponent, items, self.crit.stat, baseCritDmg, baseDmg, type, time, is_spell=True)
-        for a in range(numAttacks):
-            for item in items:
-                item.ability("postAttack", time, self)
-                
-    def activateOnHits(self, opponents, items, time, onhits=True):
-        newAttack = Attack(opponents=opponents,
-                   canCrit=True,
-                   canOnHit=True,
-                   attackType='physical',
-                   numTargets=1)
-        for item in items:
-            # here, the new attack is not used
-            item.ability("preAttack", time, self, newAttack)
-        if onhits:
-            for item in items:
-                item.ability("onAttack", time, self, opponents[0])
-        for item in items: # shiv, guinsoos
-            item.ability("postAttack", time, self, opponents[0])
-
-
-    def onHitSpell(self, opponents, items, time, targets, scaling, type='magical'):
-        # So I can actually calculate archangels on yasuo
-        tempMana = self.fullMana
-        self.fullMana = Stat(-1, 1, 0)
-        self.multiTargetSpell(opponents, items, time, targets, scaling, type)
-        self.fullMana = tempMana
-
     def multiTargetSpell(self, opponents, items, time, targets, scaling, type='magical', numAttacks=0):
         baseDmg = scaling(self.level, self.atk.stat, self.ap.stat)
         baseCritDmg = baseDmg
+        newAttack = Attack(opponents, Stat(0,1,0), 'physical', 1)
         for attacks in range(numAttacks):
             # activate onhits, currently unused
             for item in items:
-                item.ability("onAttack", time, self, opponents[0])
+                item.ability("preAttack", time, self, newAttack)
         if self.canSpellCrit:
             baseCritDmg *= self.critDamage()
         baseDmg *= self.dmgMultiplier.stat

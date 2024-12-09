@@ -9,7 +9,7 @@ import status
 champ_list = ['Cassiopeia', 'Kogmaw', 'Lux', 'Maddie', 'Morgana', 'Powder', 'Silco', 
               'TwistedFate', 'Zeri', 'Ziggs', 'Gangplank', 'Heimerdinger', 'Elise',
               'Zyra', 'Vladimir', 'Malzahar', 'Zoe', 'Nami',
-              'Swain']
+              'Swain', 'Twitch']
 
 class Lux(Champion):
     def __init__(self, level):
@@ -72,7 +72,7 @@ class Swain(Champion):
         # default traits: would be used in ui
         # probably edit this to also include default level / params
         self.default_traits = ['Conquerer', 'FormSwapper', 'Sorcerer']
-        self.castTime = 2
+        self.castTime = 1.5
         # technically her next auto is amped but it's literally the same thing
 
     def abilityScaling(self, level, AD, AP):
@@ -115,12 +115,47 @@ class Zoe(Champion):
         self.multiTargetSpell(opponents, items,
                 time, self.targets[self.level - 1] + 1, self.abilityScaling, 'magical')
 
+class Viktor(Champion):
+    def __init__(self, level):
+        hp= 1600
+        atk = 100
+        curMana = 0
+        fullMana = 80
+        aspd = .55
+        armor = 40
+        mr = 40
+        super().__init__('Viktor', hp, atk, curMana, fullMana, aspd, armor, mr, level)
+        # default traits: would be used in ui
+        # probably edit this to also include default level / params
+        self.default_traits = ['']
+        self.castTime = .5
+        self.num_targets = 2
+        self.buffs = buffs.MachineHerald()
+        self.notes = "Num targets is for auto, ult hits 8 targets"
+        # technically her next auto is amped but it's literally the same thing
+
+    def abilityScaling(self, level, AD, AP):
+        apScale = [80, 120, 1000]
+        return apScale[level - 1] * AP
+
+    def dotScaling(self, level, AD, AP):
+        apScale = [14, 21, 400]
+        return apScale[level - 1] * AP * 5
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(opponents, items,
+                time, self.num_targets, self.abilityScaling, 'magical')
+
+        opponents[0].applyStatus(status.DoTEffect("Malz {}".format(self.numCasts)),
+            self, time, self.buff_duration, self.dotScaling)
+
+
 class Malzahar(Champion):
     def __init__(self, level):
         hp= 950
         atk = 45    
         curMana = 30
-        fullMana = 90
+        fullMana = 95
         aspd = .7
         armor = 40
         mr = 40
@@ -139,7 +174,7 @@ class Malzahar(Champion):
         return apScale[level - 1] * AP
 
     def dotScaling(self, level, AD, AP):
-        apScale = [18, 27, 400]
+        apScale = [14, 21, 400]
         return apScale[level - 1] * AP * 5
 
     def performAbility(self, opponents, items, time):
@@ -203,7 +238,7 @@ class Zyra(Champion):
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
-        apScale = [80, 120, 180]
+        apScale = [95, 140, 215]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -214,6 +249,8 @@ class Zyra(Champion):
 
 
 class Heimerdinger(Champion):
+    # Cast times verified 12/7/24
+    # Patch 14.23
     def __init__(self, level):
         hp= 800
         atk = 40
@@ -226,19 +263,21 @@ class Heimerdinger(Champion):
         # default traits: would be used in ui
         # probably edit this to also include default level / params
         self.default_traits = ['Visionary']
-        self.castTime = .75
+        self.castTime = .6
         missile_amount = [5, 5, 7]
         self.missiles = missile_amount[level - 1]
+        self.notes = "Cast time set to increase by .09 with every missile."
         # technically her next auto is amped but it's literally the same thing
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [54, 81, 270]
+        apScale = [50, 75, 225]
         return apScale[level - 1] * AP * self.missiles
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(opponents, items,
                 time, 1, self.abilityScaling, 'magical')
         self.missiles += 1
+        self.castTime += .09
 
 class Gangplank(Champion):
     def __init__(self, level):
@@ -286,7 +325,7 @@ class TwistedFate(Champion):
         # default traits: would be used in ui
         # probably edit this to also include default level / params
         self.default_traits = ['Enforcer', 'Quickstriker']
-        self.castTime = 1.1
+        self.castTime = .5
         self.num_targets = 2
         self.notes = "Num targets refers solely to red card"
         # technically her next auto is amped but it's literally the same thing
@@ -295,7 +334,7 @@ class TwistedFate(Champion):
         apScale = [110, 165, 255]
         return apScale[level - 1] * AP
     def goldAbilityScaling(self, level, AD, AP):
-        apScale = [210, 315, 505]
+        apScale = [230, 345, 535]
         return apScale[level - 1] * AP
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(opponents, items,
@@ -376,7 +415,7 @@ class Renata(Champion):
         # technically her next auto is amped but it's literally the same thing
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [280, 420, 650]
+        apScale = [310, 465, 700]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
@@ -410,7 +449,7 @@ class Kogmaw(Champion):
         # technically her next auto is amped but it's literally the same thing
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [50, 75, 120]
+        apScale = [48, 72, 120]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -435,7 +474,7 @@ class Morgana(Champion):
         # technically her next auto is amped but it's literally the same thing
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [500, 750, 1150]
+        apScale = [525, 780, 1300]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -533,7 +572,7 @@ class Powder(Champion):
         # technically her next auto is amped but it's literally the same thing
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [320, 480, 680]
+        apScale = [350, 500, 700]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -556,17 +595,17 @@ class Twitch(Champion):
         armor = 30
         mr = 30
         super().__init__('Twitch', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        self.default_traits = ['Sniper']
+        self.default_traits = ['ExperimentTwitch', 'Sniper']
 
         # ultAmped: for dragon
         self.ultAutos = 0
-        self.ultAmped = False
         self.aspd_bonus = 85
         self.castTime = 0
         self.ultActive = False
         self.manalockDuration = 15 # idk what it is
         self.items = [buffs.TwitchUlt()]
-        self.notes = "Experiment not implemented yet"
+        self.notes = ""
+        self.num_targets = 2
         # we instead just say that every other cast is amped
 
     def abilityScaling(self, level, AD, AP):
@@ -601,7 +640,7 @@ class Zeri(Champion):
         # technically her next auto is amped but it's literally the same thing
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [1.8, 1.8, 1.8]
+        adScale = [2, 2, 2]
         apScale = [10, 15, 20]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -623,11 +662,11 @@ class Ziggs(Champion):
         # technically her next auto is amped but it's literally the same thing
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [175, 265, 400]
+        apScale = [180, 270, 450]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
-        apScale = [80, 120, 180]
+        apScale = [90, 135, 200]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):

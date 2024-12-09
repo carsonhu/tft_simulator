@@ -6,7 +6,7 @@ offensive_craftables = ['Rabadons', 'Bloodthirster', 'HextechGunblade', 'Guinsoo
                         'Archangels', 'HoJ', 'Guardbreaker', 'GuardbreakerNoGuard', 'InfinityEdge', 'LastWhisper',
                         'Shojin', 'Titans', 'GS', 'GSNoGiant', 'Nashors',
                         'RunaansHurricane', 'Deathblade', 'QSS', 'JeweledGauntlet', 'Red', 'Shiv',
-                        'Blue', 'Morellos', 'TacticiansCrown']
+                        'Blue', 'Morellos', 'TacticiansCrown', 'Adaptive']
 
 artifacts = ['InfinityForce', 'Fishbones', 'RFC', 'Mittens', 'GamblersBlade',
              'WitsEndStage2', 'WitsEndStage3', 'WitsEndStage4',
@@ -206,14 +206,17 @@ class Nashors(Item):
 
 class Adaptive(Item):
     def __init__(self):
-        super().__init__("Adaptive Helm", mana=15, ap=25, has_radiant=True, phases="onUpdate")
+        super().__init__("Adaptive Helm", mana=15, ap=25, has_radiant=True, phases=["onUpdate", "preAbility"])
         self.nextMana = 3
 
     def performAbility(self, phase, time, champion, input_=0):
-        if time > self.nextMana:
-            champion.curMana += 10
-            # champion.addMana(time, 10)
-            self.nextMana += 3
+        if phase == "onUpdate":
+            if time > self.nextMana:
+                champion.addMana(10)
+                # champion.addMana(time, 10)
+                self.nextMana += 3
+        elif phase == "preAbility":
+            self.nextMana += champion.castTime
         return 0
 
 class RunaansHurricane(Item):
@@ -429,7 +432,7 @@ class UnleashedToxinsIII(Item):
 class LichBane(Item):
     def __init__(self, stage):
         super().__init__("Lich Bane (Stage {})".format(stage), ap=30, aspd=30, phases=["preAbility", "preAttack"])
-        self.dmg = {2: 200, 3: 270, 4: 240, 5: 410, 6: 480}
+        self.dmg = {2: 200, 3: 270, 4: 340, 5: 410, 6: 480}
         self.enhancedAuto = False
         self.stage = stage
 
@@ -716,14 +719,17 @@ class RadiantMorellos(Item):
 
 class RadiantAdaptive(Item):
     def __init__(self):
-        super().__init__("Radiant Adaptive", mana=15, ap=65, phases="onUpdate")
+        super().__init__("Radiant Adaptive", mana=15, ap=65, phases=["onUpdate", "preAbility"])
         self.nextMana = 3
 
     def performAbility(self, phase, time, champion, input_=0):
-        if time > self.nextMana:
-            champion.curMana += 10
-            # champion.addMana(time, 20)
-            self.nextMana += 3
+        if phase == "onUpdate":
+            if time > self.nextMana:
+                champion.addMana(20)
+                # champion.addMana(time, 10)
+                self.nextMana += 3
+        elif phase == "preAbility":
+            self.nextMana += champion.castTime
         return 0
 
 class RadiantTitans(Item):

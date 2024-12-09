@@ -136,13 +136,13 @@ class Visionary(Buff):
         return 0
 
 class Quickstriker(Buff):
-    levels = [0, 2, 4, 6]
+    levels = [0, 2, 3, 4]
     def __init__(self, level, params):
         # params is number of stacks
         super().__init__("Quickstriker " + str(level), level, params,
                          phases=["preCombat"])
         # quickstriker just takes average of min and max instead
-        self.scaling = {2: 40, 4: 55, 6: 70}
+        self.scaling = {2: 40, 3: 55, 4: 70}
     def performAbility(self, phase, time, champion, input_=0):
         champion.aspd.addStat(self.scaling[self.level])
         return 0

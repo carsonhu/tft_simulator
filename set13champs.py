@@ -327,7 +327,7 @@ class TwistedFate(Champion):
         self.default_traits = ['Enforcer', 'Quickstriker']
         self.castTime = .5
         self.num_targets = 2
-        self.notes = "Num targets refers solely to red card"
+        self.notes = "Num targets refers solely to red card, Quickstriker assumes 50% hp"
         # technically her next auto is amped but it's literally the same thing
 
     def abilityScaling(self, level, AD, AP):

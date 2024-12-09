@@ -1,4 +1,4 @@
-https://tftsimulator13.streamlit.app/ChampionSelector
+https://tftsimulator.streamlit.app/ChampionSelector
 
 # TFT Simulator
 

@@ -296,7 +296,7 @@ class Vladimir(Champion):
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
-        self.dmgMultiplier.addStat(.05)
+        self.dmgMultiplier.addStat(.1)
         self.multiTargetSpell(opponents, items,
                 time, 1, self.abilityScaling, 'magical')
         self.multiTargetSpell(opponents, items,

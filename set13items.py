@@ -206,7 +206,7 @@ class Nashors(Item):
 
 class Adaptive(Item):
     def __init__(self):
-        super().__init__("Adaptive Helm", mana=15, ap=25, has_radiant=True, phases=["onUpdate", "preAbility"])
+        super().__init__("Adaptive Helm", mana=15, ap=25, has_radiant=True, phases=["onUpdate", "postAbility"])
         self.nextMana = 3
         self.mana_gained = 10
 
@@ -220,7 +220,8 @@ class Adaptive(Item):
                     champion.addMana(self.mana_gained)
                     # champion.addMana(time, 10)
                     self.nextMana += 3
-        elif phase == "preAbility":
+        elif phase == "postAbility":
+            # post-ability because of variable cast time (mel)
             self.nextMana += champion.castTime
         return 0
 
@@ -724,7 +725,7 @@ class RadiantMorellos(Item):
 
 class RadiantAdaptive(Item):
     def __init__(self):
-        super().__init__("Radiant Adaptive", mana=15, ap=65, phases=["onUpdate", "preAbility"])
+        super().__init__("Radiant Adaptive", mana=15, ap=65, phases=["onUpdate", "postAbility"])
         self.nextMana = 3
         self.mana_gained = 20
 
@@ -737,7 +738,7 @@ class RadiantAdaptive(Item):
                 else:
                     champion.addMana(self.mana_gained)
                     self.nextMana += 3
-        elif phase == "preAbility":
+        elif phase == "postAbility":
             self.nextMana += champion.castTime
         return 0
 

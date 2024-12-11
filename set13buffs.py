@@ -25,7 +25,8 @@ anomalies = get_classes_from_file(file_path)
 class_buffs = ['Sorcerer', 'FormSwapper', 'Family', 'Visionary', 'Sniper', 
                'Quickstriker', 'Dominator', 'Ambusher', 'Rebel',
                'Conquerer', 'EmissaryNami', 'EmissaryTrist',
-               'PitFighter', 'ExperimentTwitch', 'Enforcer']
+               'PitFighter', 'ExperimentTwitch', 'Enforcer',
+               'BanishedMage']
 
 augments = ['ClockworkAccelerator', 'ManaflowI', 'ManaflowII', 'Shred30',
             'BlazingSoulI', 'BlazingSoulII', 'BadLuckProtection',
@@ -127,7 +128,6 @@ class ExperimentTwitch(Buff):
 class Visionary(Buff):
     levels = [0, 2, 4, 6, 8]
     def __init__(self, level, params):
-        # params is number of stacks
         super().__init__("Visionary " + str(level), level, params,
                          phases=["preCombat"])
         self.scaling = {2: .25, 4: .5, 6: .8, 8: 1}
@@ -138,7 +138,6 @@ class Visionary(Buff):
 class Quickstriker(Buff):
     levels = [0, 2, 3, 4]
     def __init__(self, level, params):
-        # params is number of stacks
         super().__init__("Quickstriker " + str(level), level, params,
                          phases=["preCombat"])
         # quickstriker just takes average of min and max instead
@@ -150,7 +149,6 @@ class Quickstriker(Buff):
 class Family(Buff):
     levels = [0, 3, 4, 5]
     def __init__(self, level, params):
-        # params is number of stacks
         super().__init__("Family " + str(level), level, params,
                          phases=["preCombat"])
         self.scaling = {3: .25, 4: .3, 5: .4}
@@ -173,7 +171,6 @@ class Enforcer(Buff):
 class FormSwapper(Buff):
     levels = [0, 2, 4]
     def __init__(self, level, params):
-        # params is number of stacks
         super().__init__("Form Swapper " + str(level), level, params,
                          phases=["preCombat"])
         self.scaling = {2: .20, 4: .40}
@@ -184,7 +181,6 @@ class FormSwapper(Buff):
 class LeblancUlt(Buff):
     levels = [1]
     def __init__(self, level=1, params=0):
-        # params is number of stacks
         super().__init__("The Chains of Fate", level, params, phases=["preAttack"])
     def performAbility(self, phase, time, champion, input_=0):
         # input is attack
@@ -208,7 +204,6 @@ class LeblancUlt(Buff):
 class TwitchUlt(Buff):
     levels = [1]
     def __init__(self, level=1, params=0):
-        # params is number of stacks
         super().__init__("Spray and Pray", level, params, phases=["preAttack"])
     def performAbility(self, phase, time, champion, input_=0):
         # input is attack
@@ -233,10 +228,21 @@ class TwitchUlt(Buff):
         return 0
 
 
+class BanishedMage(Buff):
+    levels = [0, 1]
+    def __init__(self, level, params):
+        # just sets whether Mel has 10% dmg amp
+        super().__init__("Banished Mage " + str(level), level, params,
+                         phases=["preCombat"])
+        self.scaling = {0: 0, 1: .1}
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.dmgMultiplier.addStat(self.scaling[self.level])
+        return 0
+
 class Sniper(Buff):
     levels = [0, 2, 4, 6]
     def __init__(self, level, params):
-        # params is number of stacks
+        # params is number of hexes
         super().__init__("Sniper " + str(level), level, params,
                          phases=["preCombat"])
         self.scaling = {0: 0, 2: .07, 4: .16, 6: .35}
@@ -259,13 +265,10 @@ class Sniper(Buff):
 class Dominator(Buff):
     levels=[0, 2, 4, 6]
     def __init__(self, level, params):
-        # vayne bolts inflicts status "Silver Bolts"
         super().__init__("Dominator " + str(level), level, params,
                          phases=["preAbility"])
         self.scaling = {0: 0, 2: .25, 4: .5, 6: .75}
-        #self.chakramQueue = deque()
-        # chakram[0]: number of chakrams
-        # chakram[1]: time to end
+
     def performAbility(self, phase, time, champion, input_=0):
         champion.ap.addStat(self.scaling[self.level] * champion.fullMana.stat)
         return 0
@@ -273,7 +276,6 @@ class Dominator(Buff):
 class Ambusher(Buff):
     levels = [0, 2, 3, 4, 5]
     def __init__(self, level, params):
-        # params is number of stacks
         super().__init__("Ambusher " + str(level), level, params,
                          phases=["preCombat"])
         self.crit_scaling = {0: 0, 2: 25, 3: 35, 4: 45, 5: 55}
@@ -287,7 +289,7 @@ class Ambusher(Buff):
 class Artillerist(Buff):
     levels = [0, 2, 4, 6]
     def __init__(self, level, params):
-        # params is number of stacks
+        # params is number of targets
         super().__init__("Artillerist " + str(level), level, params,
                          phases=["preCombat", "preAttack"])
         self.attacks_until_rocket = {2: 5, 4: 5, 6: 4}
@@ -315,7 +317,7 @@ class Artillerist(Buff):
                 input_.attackType = 'physical'
                 input_.scaling = lambda level, AD, AP: AD * self.ad_scaling[self.level]
                 input_.numTargets = self.num_targets
-                
+
         return 0
 
     def extraBuff(self, num_targets):
@@ -324,7 +326,7 @@ class Artillerist(Buff):
 class Emissary(Buff):
     levels = [0, 1, 4]
     def __init__(self, level, params, emissary_name):
-        # params is number of stacks
+        # params: Whether champ is emissary
         super().__init__("Emissary " + str(level), level, params,
                          phases=["preCombat"])
         self.emissary_name = emissary_name
@@ -361,7 +363,6 @@ class EmissaryTrist(Emissary):
 class Rebel(Buff):
     levels = [0, 3, 5, 7]
     def __init__(self, level, params):
-        # params is number of stacks
         super().__init__("Rebel " + str(level), level, params,
                          phases=["onUpdate"])
         self.atk_scaling = {0: 0, 3: 15, 5: 30, 7: 45}
@@ -391,7 +392,6 @@ class Conquerer(Buff):
         return 0
 
     def extraParameters():
-        # defining the parameters for the extra shit
         return {"Title": "War Chests",
                 "Min": 0,
                 "Max": 15,

@@ -203,20 +203,18 @@ class TitanicStrikes(Buff):
             champion.doDamage(champion.opponents[0], [], 0, base_dmg, base_dmg, 'physical', time)
         return 0
 
-# class EssenceOfNavori(Buff):
+# class WolfFamiliars(Buff):
 #     levels = [1]
 #     def __init__(self, level, params):
 #         # params is number of stacks
-#         super().__init__("Essence Of Navori", level, params,
-#                          phases=["preCombat", "preAbility"])
-#         self.max_reductions = 3
-#         self.scaling = .1
+#         super().__init__("Wolf Familiars", level, params,
+#                          phases=["onUpdate"])
+#         self.wolf_ad = 45
+#         self.wolf_as = .9
+#         self.wolf_crit = .25
+#         self_wolf_crit_dmg = 1.4
 #     def performAbility(self, phase, time, champion, input_=0):
-#         if phase == "preCombat":
-#             champion.fullMana.mult -= .1
-#         elif phase == "preAbility":
-#             if self.max_reductions > 0:
-#                 champion.fullMana.mult -= .1
-#                 self.max_reductions -= 1
-            
+#         if time > self.nextBonus:
+#             champion.atk.addStat(self.scaling)
+#             self.nextBonus += 2
 #         return 0

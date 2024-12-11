@@ -9,6 +9,7 @@ import set13items
 from set13buffs import *
 from set13champs import *
 from set13items import *
+# import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 import itertools
@@ -169,15 +170,21 @@ def plot_df(df, simLists):
 
     col1, col2 = st.columns([3, 1])
 
-    plot_labels = {key: '{}: {} {}'.format(key, value['Name'],
+    plot_labels = {key: '{}: {}'.format(key,
                                            value['Item']) for key, value in dmg_dict.items()}
 
     # setting the title
 
     if len(dmg_dict) > 0:
         with col1:
+        #     fig = go.Figure()
+        #     fig.update_layout(
+        #       title="{} Damage Chart".format(champ_name),
+        #       xaxis_title = "Time",
+        #       yaxis_title = "Damage",
+        #       hovermode = "x unified")
             fig, ax = plt.subplots()
-            ax.set_title('Damage Chart')
+            ax.set_title('{} Damage Chart'.format(champ_name))
             ax.set_xlabel('Time')
             ax.set_ylabel('Damage')
         with col2:
@@ -186,14 +193,18 @@ def plot_df(df, simLists):
             st.dataframe(dmg_dict[index]['Dmg'].round(2), hide_index=True, column_config={"Total Dmg": None})
 
     for key, value in dmg_dict.items():
-        with col1:
-            ax.plot(value['Dmg']['Time'],
-                    value['Dmg']['Total Dmg'],
-                    label=plot_labels[key])
-            ax.legend()
+        # with col1:
+          # fig.add_trace(go.Line(x=value['Dmg']['Time'],
+          #                       y=value['Dmg']['Total Dmg'],
+          #                       name=plot_labels[key]))
+          ax.plot(value['Dmg']['Time'],
+                  value['Dmg']['Total Dmg'],
+                  label=plot_labels[key])
+          ax.legend()
 
     if len(dmg_dict) > 0:
         with col1:
+            # st.plotly_chart(fig)
             st.pyplot(fig)
 
 def items_list(items, default_item='NoItem'):

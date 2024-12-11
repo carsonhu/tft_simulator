@@ -106,7 +106,7 @@ class Champion(object):
         self.manalockTime = -1  # time until unmanalocked
         self.manalockDuration = 0  # how long manalock lasts
         self.castTime = 0
-        self.attackWindupLockout = 0 # attack windup: can only cast after attack windup is finished
+        self.attackWindupLockout = -1 # attack windup: can only cast after attack windup is finished
         self.items = []
         self.statuses = {}  # current statuses
         self.nextAttackTime = 0
@@ -176,7 +176,7 @@ class Champion(object):
                 self.statuses[status.name].reapplication(self, champion,  time, duration, params)
 
     # get basic stats from items
-    def addStats(self,item):
+    def addStats(self,item) -> None:
         self.hp.addStat(item.hp)
         self.atk.addStat(item.ad) # now we have multipicative AD only
         self.ap.addStat(item.ap)
@@ -187,14 +187,18 @@ class Champion(object):
         self.crit.addStat(item.crit / 100)
 
     def canCast(self, time):
-        # check whether we can currently cast
+        # 4 conditions:
+        # Current mana >= full mana
+        # champ can cast
+        # champ not manalocked
+        # champ not in auto animation
         return self.curMana >= self.fullMana.stat and self.fullMana.stat > -1 \
             and self.manalockTime <= time and self.attackWindupLockout < time
 
     def canAttack(self, time):
         return time >= self.nextAttackTime
 
-    def addMana(self, amount):
+    def addMana(self, amount) -> None:
         # if time > self.manalockTime:
         #     # may need to adjust this
         self.curMana += amount * self.manaGainMultiplier.stat
@@ -316,31 +320,52 @@ class Champion(object):
 
     def doDamage(self, opponent, items, critChance, damageIfCrit, damage,
                  dtype, time, is_spell=False):
-        # actually doing damage: consider average of damage if crit and damage
+        """ Actually doing damage: consider
+            average of damage if crit and damage
+        
+        Args:
+            opponent (Champion): opp to do dmg to
+            items (List[item]): List of active items/buffs
+            critChance (float)
+            damageIfCrit (float)
+            damage (float): dmg if not crit
+            dtype (str): "physical", "magical", "true"
+            time (int)
+            is_spell (bool, optional): is it spell damage?
+        """
+        # 
         # if not crit
         critChance = min(1, critChance)
         preDmg = damage
         preCritDmg = damageIfCrit
-        # for item in items:
-        #     preDmg = item.ability("onDoDamage", time, self, preDmg)
-        #     preCritDmg = item.ability("onDoDamage", time, self, preCritDmg)
-
+        
         avgDmg = (preDmg * (1 - critChance) + preCritDmg * critChance)
+        # if anything needs to modify the damage dealt
         for item in items:
             avgDmg = item.ability("onDealDamage", time, self, avgDmg)
+        # if only spell dmg needs to be modified (Arcana Xerath)    
         if is_spell:
             for item in items:
                 avgDmg = item.ability("onDealSpellDamage", time, self, avgDmg)
 
         avgDmg = self.damage(avgDmg, dtype, opponent)
-
         
-        # avgDmg = (dmg[0] * (1 - critChance) + critDmg[0] * critChance, dmg[1])
         if avgDmg:
             # record (Time, Damage Dealt, current AS, current Mana)
             self.dmgVector.append((time, avgDmg, self.aspd.stat, self.curMana))
 
     def multiTargetSpell(self, opponents, items, time, targets, scaling, type='magical', numAttacks=0):
+        """Cast a damage-dealing spell
+        
+        Args:
+            opponents (List[Champion]): List of opponents
+            items (List[item]): active items & buffs
+            time (float): current float
+            targets (int): # targets
+            scaling (func): damage func(level, AD, AP)
+            type (str, optional): physical, magical, true
+            numAttacks (int, optional): # of attacks to apply for guinsoo/runaans
+        """
         baseDmg = scaling(self.level, self.atk.stat, self.ap.stat)
         baseCritDmg = baseDmg
         newAttack = Attack(opponents, Stat(0,1,0), 'physical', 1, regularAuto=False)
@@ -372,8 +397,6 @@ class Champion(object):
             defense = 0
 
         # also add in 'damageTaken' modifier
-
-
         dModifier = 100 / (100 + defense)
         return (dmg * dModifier, dtype)
         

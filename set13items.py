@@ -549,14 +549,13 @@ class RadiantShiv(Item):
 
 class RadiantBlue(Item):
     def __init__(self):
-        super().__init__("Radiant Blue", mana=60, ap=50, ad=50, phases=["preCombat", "onUpdate"])
+        super().__init__("Radiant Blue", mana=60, ap=50, ad=50, phases=["postAbility", "onUpdate"])
         self.has_activated = False
-        
-
+    
     def performAbility(self, phase, time, champion, input_=0):
         # blue buff is the only multiplier so we just to flat -10
-        if phase == "preCombat":   
-            champion.fullMana.add = -10
+        if phase == "postAbility":
+            champion.addMana(10)
 
         if phase == "onUpdate":
             if time > champion.first_takedown and not self.has_activated:

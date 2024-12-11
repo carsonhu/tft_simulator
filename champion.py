@@ -67,7 +67,7 @@ class Attack(object):
     # stores details on an attack
     def __init__(self, opponents, scaling=lambda level, AD, AP=0: AD, canCrit=True,
                  canOnHit=True, multiplier=Stat(0, 1, 0),
-                 attackType='physical', numTargets=1):
+                 attackType='physical', numTargets=1, regularAuto=True):
         self.opponents = opponents
         self.scaling = scaling
         self.canCrit = canCrit
@@ -75,6 +75,7 @@ class Attack(object):
         self.multiplier = multiplier
         self.attackType = attackType
         self.numTargets = numTargets
+        self.regularAuto = regularAuto
 
 class Champion(object):
     def __init__(self, name, hp, atk, curMana, fullMana, aspd, armor, mr, level):
@@ -342,7 +343,7 @@ class Champion(object):
     def multiTargetSpell(self, opponents, items, time, targets, scaling, type='magical', numAttacks=0):
         baseDmg = scaling(self.level, self.atk.stat, self.ap.stat)
         baseCritDmg = baseDmg
-        newAttack = Attack(opponents, Stat(0,1,0), 'physical', 1)
+        newAttack = Attack(opponents, Stat(0,1,0), 'physical', 1, regularAuto=False)
         for attacks in range(numAttacks):
             # activate onhits, currently unused
             for item in items:

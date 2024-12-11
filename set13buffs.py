@@ -181,6 +181,30 @@ class FormSwapper(Buff):
         champion.dmgMultiplier.addStat(self.scaling[self.level])
         return 0
 
+class LeblancUlt(Buff):
+    levels = [1]
+    def __init__(self, level=1, params=0):
+        # params is number of stacks
+        super().__init__("The Chains of Fate", level, params, phases=["preAttack"])
+    def performAbility(self, phase, time, champion, input_=0):
+        # input is attack
+        if champion.ultActive and champion.ultAutos > 0:
+            champion.multiTargetSpell(champion.opponents,
+                                      champion.items, time,
+                                      1, champion.autoAbilityScaling,
+                                      'magical')    
+            champion.multiTargetSpell(champion.opponents,
+                                      champion.items, time,
+                                      1, lambda x, y, z: champion.autoAbilityScaling(x, y, z) * .25,
+                                      'true')    
+            champion.ultAutos -= 1
+            # just call doattack
+            if champion.ultAutos == 0:
+                champion.manalockTime = time + .01
+                champion.ultActive = False
+                # so u dont gain mana on last auto
+        return 0
+
 class TwitchUlt(Buff):
     levels = [1]
     def __init__(self, level=1, params=0):
@@ -204,6 +228,7 @@ class TwitchUlt(Buff):
             if champion.ultAutos == 0:
                 champion.aspd.addStat(-85)
                 champion.manalockTime = time + .01
+                champion.ultActive = False
                 # so u dont gain mana on last auto
         return 0
 
@@ -259,6 +284,42 @@ class Ambusher(Buff):
         champion.canSpellCrit = True
         return 0
 
+class Artillerist(Buff):
+    levels = [0, 2, 4, 6]
+    def __init__(self, level, params):
+        # params is number of stacks
+        super().__init__("Artillerist " + str(level), level, params,
+                         phases=["preCombat", "preAttack"])
+        self.attacks_until_rocket = {2: 5, 4: 5, 6: 4}
+        self.rocket_scaling = {2: 1.25, 4: 1.25, 6: 1.25}
+        self.ad_scaling = {2: 10, 4: 45, 6: 60}
+        self.num_targets = 0
+        self.extraBuff(params)
+
+    def extraParameters():
+        # defining the parameters for the extra shit
+        return {"Title": "# Targets",
+                "Min": 1,
+                "Max": 3,
+                "Default": 2}
+
+
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preCombat":
+            champion.atk.addStat(self.ad_scaling[self.level])
+        elif phase == "preAttack":
+            # if attack is a spell, this is queued up until first real auto
+            if champion.numAttacks % self.attacks_until_rocket[self.level] == 0:
+                input_.canOnHit = True # does it?
+                input_.canCrit = champion.canCrit
+                input_.attackType = 'physical'
+                input_.scaling = lambda level, AD, AP: AD * self.ad_scaling[self.level]
+                input_.numTargets = self.num_targets
+                
+        return 0
+
+    def extraBuff(self, num_targets):
+        self.num_targets = num_targets
 
 class Emissary(Buff):
     levels = [0, 1, 4]

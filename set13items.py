@@ -208,13 +208,18 @@ class Adaptive(Item):
     def __init__(self):
         super().__init__("Adaptive Helm", mana=15, ap=25, has_radiant=True, phases=["onUpdate", "preAbility"])
         self.nextMana = 3
+        self.mana_gained = 10
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "onUpdate":
             if time > self.nextMana:
-                champion.addMana(10)
-                # champion.addMana(time, 10)
-                self.nextMana += 3
+                if champion.manalockTime > time:
+                    # if currently manalocked, add until non-manalocked
+                    self.nextMana += 1/30
+                else:
+                    champion.addMana(self.mana_gained)
+                    # champion.addMana(time, 10)
+                    self.nextMana += 3
         elif phase == "preAbility":
             self.nextMana += champion.castTime
         return 0
@@ -721,13 +726,17 @@ class RadiantAdaptive(Item):
     def __init__(self):
         super().__init__("Radiant Adaptive", mana=15, ap=65, phases=["onUpdate", "preAbility"])
         self.nextMana = 3
+        self.mana_gained = 20
 
     def performAbility(self, phase, time, champion, input_=0):
         if phase == "onUpdate":
             if time > self.nextMana:
-                champion.addMana(20)
-                # champion.addMana(time, 10)
-                self.nextMana += 3
+                if champion.manalockTime > time:
+                    # if currently manalocked, add until non-manalocked
+                    self.nextMana += 1/30
+                else:
+                    champion.addMana(self.mana_gained)
+                    self.nextMana += 3
         elif phase == "preAbility":
             self.nextMana += champion.castTime
         return 0

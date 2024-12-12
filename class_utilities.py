@@ -276,6 +276,44 @@ def first_takedown(key, champ):
                                      value=5, key=key)
     champ.first_takedown = first_takedown
 
+def bonus_stats(key, champ):
+    """Enemy list: Configure the base stats of the enemy: HP, Armor, and MR
+    
+    Args:
+        key (string): unique key for streamlit
+    
+    Returns:
+        Champion: a champion with the requested hp, armor, and mr
+    """
+
+    # st.subheader("First takedown")
+    cols = st.columns(3)
+    with cols[0]:
+      ad_bonus = st.number_input('Bonus AD',
+                                       min_value=0, max_value=2000,
+                                       value=0, key=key + "ad")
+    with cols[1]:
+      ap_bonus = st.number_input('Bonus AP',
+                                       min_value=0, max_value=2000,
+                                       value=0, key=key + "ap")
+    with cols[2]:
+      as_bonus = st.number_input('Bonus AS',
+                                       min_value=0, max_value=200,
+                                       value=0, key=key + "AS")
+    # with col2:
+    #   crit_bonus = st.number_input('Bonus Crit',
+    #                                    min_value=0, max_value=200,
+    #                                    value=0, key=key + "crit")
+    #   crit_dmg_bonus = st.number_input('Bonus Crit Dmg',
+    #                                    min_value=0, max_value=200,
+    #                                    value=0, key=key + "critdmg")
+    champ.atk.addStat(ad_bonus)
+    champ.ap.addStat(ap_bonus)
+    champ.aspd.addStat(as_bonus)
+    # champ.crit.addStat(crit_bonus)
+    # champ.critDmg.addStat(crit_dmg_bonus)
+
+
 def num_traits(key, champ):
     """num traits
     

@@ -71,6 +71,7 @@ with st.sidebar:
         class_utilities.first_takedown("Takedown", champ)
         class_utilities.num_traits("Num traits", champ)
         class_utilities.rebel_time("Rebel", champ)
+        class_utilities.bonus_stats("Bonus Stats", champ)
 
 
     st.header("Global Items")

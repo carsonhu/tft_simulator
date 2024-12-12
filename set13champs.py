@@ -9,7 +9,7 @@ import status
 champ_list = ['Cassiopeia', 'Kogmaw', 'Lux', 'Maddie', 'Morgana', 'Powder', 'Silco', 
               'TwistedFate', 'Zeri', 'Ziggs', 'Gangplank', 'Heimerdinger', 'Elise',
               'Zyra', 'Vladimir', 'Malzahar', 'Zoe', 'Nami',
-              'Swain', 'Twitch', 'Leblanc', 'Vex', 'Mel']
+              'Swain', 'Twitch', 'Leblanc', 'Vex', 'Mel', 'Renata']
 
 class Lux(Champion):
     def __init__(self, level):
@@ -133,7 +133,8 @@ class Mel(Champion):
 
     def unleashAbilityScaling(self, level, AD, AP):
         apScale = [1390, 3475, 99999]
-        shield_bonus = (300 * 3) * 2 * self.shield_power
+        shieldScaling [300, 600, 10000]
+        shield_bonus = (shieldScaling[level-1] * 3) * 2 * self.shield_power
         # 3 allies, 2 casts
         return apScale[level - 1] * AP + shield_bonus
 
@@ -553,7 +554,9 @@ class Morgana(Champion):
         super().__init__('Morgana', hp, atk, curMana, fullMana, aspd, armor, mr, level)
         self.default_traits = ['Visionary']
         self.castTime = 0.5
-        self.notes = "Damage is instant here, will be fixed later."
+        self.notes = "Damage is instant here; sims on morg will be \
+                      misleading since her targets will die before \
+                      she gets full DoT value anyways."
 
     def abilityScaling(self, level, AD, AP):
         apScale = [525, 780, 1300]

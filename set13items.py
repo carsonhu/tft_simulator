@@ -378,7 +378,7 @@ class Mittens(Item):
 
 class GamblersBlade(Item):
     def __init__(self):
-        super().__init__("Gambler's Blade (30g)", aspd=70, ap=10, phases=None)
+        super().__init__("Gambler's Blade (30g)", aspd=75, ap=10, phases=None)
 
     def performAbility(self, phase, time, champion, input_):
         return 0

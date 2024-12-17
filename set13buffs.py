@@ -1,6 +1,7 @@
 from collections import deque, Counter
 from set13items import Item
 from champion import Stat, Attack, AD
+
 import numpy as np
 import copy
 import status
@@ -26,12 +27,12 @@ class_buffs = ['Sorcerer', 'FormSwapper', 'Family', 'Visionary', 'Sniper',
                'Quickstriker', 'Dominator', 'Ambusher', 'Rebel',
                'Conquerer', 'EmissaryNami', 'EmissaryTrist',
                'PitFighter', 'ExperimentTwitch', 'Enforcer',
-               'BanishedMage']
+               'BanishedMage', 'Artillerist']
 
 augments = ['ClockworkAccelerator', 'ManaflowI', 'ManaflowII', 'Shred30',
             'BlazingSoulI', 'BlazingSoulII', 'BadLuckProtection',
             'CalculatedEnhancement', 'GlassCannonI',
-            'GlassCannonII']
+            'GlassCannonII', 'FlurryOfBlows']
 
 
 
@@ -89,7 +90,7 @@ class Sorcerer(Buff):
         super().__init__("Sorcerer " + str(level), level, params,
                          phases=["preCombat"])
         self.base_scaling = 10
-        self.scaling = {2: 20, 4: 50, 6: 95, 8: 110}
+        self.scaling = {2: 20, 4: 50, 6: 95, 8: 125}
     def performAbility(self, phase, time, champion, input_=0):
         champion.ap.addStat(self.base_scaling)
         champion.ap.addStat(self.scaling[self.level])
@@ -201,6 +202,27 @@ class LeblancUlt(Buff):
                 # so u dont gain mana on last auto
         return 0
 
+class DravenUlt(Buff):
+    levels = [1]
+    def __init__(self, level=1, params=0):
+        super().__init__("Spinning Axes", level, params, phases=["preAttack", "onUpdate"])
+        self.attack_queue = deque()
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "preAttack":
+            if champion.axes > 0:
+                input_.canOnHit = True
+                input_.canCrit = champion.canCrit
+                input_.attackType = 'physical'
+                input_.scaling = champion.abilityScaling
+                champion.axes -= 1
+                self.attack_queue.append(time + 1.5)
+        if phase == "onUpdate":
+            if self.attack_queue and self.attack_queue[0] < time:
+                if champion.axes < 2:
+                    champion.axes += 1
+                self.attack_queue.popleft()
+        return 0
+
 class TwitchUlt(Buff):
     levels = [1]
     def __init__(self, level=1, params=0):
@@ -245,7 +267,7 @@ class Sniper(Buff):
         # params is number of hexes
         super().__init__("Sniper " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {0: 0, 2: .07, 4: .16, 6: .35}
+        self.scaling = {0: 0, 2: .07, 4: .18, 6: .36}
         self.base_bonus = 0
         self.extraBuff(params)
     def performAbility(self, phase, time, champion, input_=0):
@@ -292,10 +314,11 @@ class Artillerist(Buff):
         # params is number of targets
         super().__init__("Artillerist " + str(level), level, params,
                          phases=["preCombat", "preAttack"])
-        self.attacks_until_rocket = {2: 5, 4: 5, 6: 4}
-        self.rocket_scaling = {2: 1.25, 4: 1.25, 6: 1.25}
-        self.ad_scaling = {2: 10, 4: 45, 6: 60}
+        self.attacks_until_rocket = {0: 0, 2: 5, 4: 5, 6: 4}
+        self.rocket_scaling = {0: 0, 2: 1.25, 4: 1.25, 6: 1.25}
+        self.ad_scaling = {0:0, 2: 10, 4: 45, 6: 70}
         self.num_targets = 0
+        self.next_rocket = self.attacks_until_rocket[self.level]
         self.extraBuff(params)
 
     def extraParameters():
@@ -311,13 +334,15 @@ class Artillerist(Buff):
             champion.atk.addStat(self.ad_scaling[self.level])
         elif phase == "preAttack":
             # if attack is a spell, this is queued up until first real auto
-            if champion.numAttacks % self.attacks_until_rocket[self.level] == 0:
+            if self.next_rocket <= 1 and input_.regularAuto:
                 input_.canOnHit = True # does it?
                 input_.canCrit = champion.canCrit
                 input_.attackType = 'physical'
-                input_.scaling = lambda level, AD, AP: AD * self.ad_scaling[self.level]
+                input_.scaling = lambda level, AD, AP: AD * self.rocket_scaling[self.level]
                 input_.numTargets = self.num_targets
-
+                self.next_rocket = self.attacks_until_rocket[self.level]
+            else:
+                self.next_rocket -= 1
         return 0
 
     def extraBuff(self, num_targets):
@@ -386,9 +411,11 @@ class Conquerer(Buff):
                          phases=["preCombat"])
         self.scaling = {0: 0, 2: 18, 4: 25, 6: 40, 9: 100}
         self.chests = 0
+        self.chest_scaling = 0.05
         self.extraBuff(params)
     def performAbility(self, phase, time, champion, input_=0):
-        champion.aspd.addStat(self.scaling[self.level] * (1 + .03 * self.chests))
+        champion.atk.addStat(self.scaling[self.level] * (1 + self.chest_scaling * self.chests))
+        champion.ap.addStat(self.scaling[self.level] * (1 + self.chest_scaling * self.chests))
         return 0
 
     def extraParameters():
@@ -803,7 +830,7 @@ class ZeriUlt(Buff):
             input_.canCrit = champion.canSpellCrit
             input_.attackType = 'physical'
             input_.scaling = champion.abilityScaling
-            input_.numTargets = 3  
+            input_.numTargets = 3
             self.stacks = 0
         return 0
 
@@ -998,6 +1025,16 @@ class BlossomingLotusII(Buff):
             if time >= self.nextBonus:
                 self.nextBonus += 3
                 champion.crit.addStat(self.critBonus)
+        return 0
+
+class FlurryOfBlows(Buff):
+    levels=[1]
+    def __init__(self, level=1, params=0):
+        super().__init__("Flurry of Blows", level, params, phases=["preCombat"])
+
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.aspd.addStat(30)
+        champion.crit.addStat(.35)
         return 0
 
 class GlassCannonI(Buff):

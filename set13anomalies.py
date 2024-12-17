@@ -97,6 +97,16 @@ class IntoTheUnknown(Buff):
         champion.ap.addStat(self.scaling)
         return 0
 
+class Repulsor(Buff):
+    levels = [1]
+    def __init__(self, level, params):
+        super().__init__("Repulsor", level, params,
+                         phases=["preCombat"])
+        self.scaling = 35
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.aspd.addStat(self.scaling)
+        return 0
+
 class CullTheWeak(Buff):
     levels = [1]
     def __init__(self, level, params):
@@ -197,11 +207,13 @@ class TitanicStrikes(Buff):
                          phases=["preAttack"])
         self.scaling = .40
     def performAbility(self, phase, time, champion, input_=0):
-        targets = 2
-        base_dmg = self.scaling * champion.atk.stat
-        for i in range(targets):
-            champion.doDamage(champion.opponents[0], [], 0, base_dmg, base_dmg, 'physical', time)
-        return 0
+        if input_.regularAuto:
+            # shouldn't proc on spells
+            targets = 2
+            base_dmg = self.scaling * champion.atk.stat
+            for i in range(targets):
+                champion.doDamage(champion.opponents[0], [], 0, base_dmg, base_dmg, 'physical', time)
+            return 0
 
 # class WolfFamiliars(Buff):
 #     levels = [1]

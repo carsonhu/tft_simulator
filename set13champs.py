@@ -9,7 +9,8 @@ import status
 champ_list = ['Cassiopeia', 'Kogmaw', 'Lux', 'Maddie', 'Morgana', 'Powder', 'Silco', 
               'TwistedFate', 'Zeri', 'Ziggs', 'Gangplank', 'Heimerdinger', 'Elise',
               'Zyra', 'Vladimir', 'Malzahar', 'Zoe', 'Nami',
-              'Swain', 'Twitch', 'Leblanc', 'Vex', 'Mel', 'Renata']
+              'Swain', 'Twitch', 'Leblanc', 'Vex', 'Mel', 'Renata',
+              'Ezreal', 'Draven', 'Tristana', 'Corki']
 
 class Lux(Champion):
     def __init__(self, level):
@@ -263,7 +264,7 @@ class Malzahar(Champion):
         return apScale[level - 1] * AP
 
     def dotScaling(self, level, AD, AP):
-        apScale = [14, 21, 400]
+        apScale = [15, 22, 400]
         return apScale[level - 1] * AP * 5
 
     def performAbility(self, opponents, items, time):
@@ -457,7 +458,8 @@ class Tristana(Champion):
         mr = 20
         super().__init__('Tristana', hp, atk, curMana, fullMana, aspd, armor, mr, level)
         self.default_traits = ['EmissaryTrist', 'Artillerist']
-        self.castTime = 1
+        self.castTime = .75
+        self.notes = "Open 'Extra options' to increase her AD from passivev"
 
     def abilityScaling(self, level, AD, AP):
         adScale = [5.25, 5.25, 5.25]
@@ -466,7 +468,67 @@ class Tristana(Champion):
 
     def performAbility(self, opponents, items, time):
         self.multiTargetSpell(opponents, items,
-                time, 1, self.abilityScaling, 'physical')
+                time, 1, self.abilityScaling, 'physical', 1)
+
+class Corki(Champion):
+    def __init__(self, level):
+        hp= 850
+        atk = 65
+        curMana = 0
+        fullMana = 60
+        aspd = .75
+        armor = 30
+        mr = 30
+        super().__init__('Corki', hp, atk, curMana, fullMana, aspd, armor, mr, level)
+        self.default_traits = ['Artillerist']
+        self.castTime = 4
+        self.notes = "Currently Artillerist isn't working properly on Corki. No armor shred"
+        self.num_reg_missiles = [18, 18, 30]
+        self.num_big_missiles = [3, 3, 5]
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [.35, .35, .35]
+        apScale = [6, 9, 36]
+        return (apScale[level - 1] * AP + adScale[level - 1] * AD) * self.num_reg_missiles[self.level - 1]
+
+    def bigAbilityScaling(self, level, AD, AP):
+        adScale = [.35, .35, .35]
+        apScale = [6, 9, 36]
+        return (apScale[level - 1] * AP + adScale[level - 1] * AD) * self.num_big_missiles[self.level - 1] * 7
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(opponents, items,
+                time, 1, self.abilityScaling, 'physical', 4)
+        self.multiTargetSpell(opponents, items,
+                time, 1, self.bigAbilityScaling, 'physical')
+
+
+
+class Draven(Champion):
+    def __init__(self, level):
+        hp= 500
+        atk = 55
+        curMana = 30
+        fullMana = 60
+        aspd = .7
+        armor = 15
+        mr = 15
+        super().__init__('Draven', hp, atk, curMana, fullMana, aspd, armor, mr, level)
+        self.default_traits = ['Conquerer', 'PitFighter']
+        self.castTime = 0
+        self.axes = 0
+        self.items = [buffs.DravenUlt()]
+        self.notes = "1.5 second return time."
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [1.4, 1.4, 1.4]
+        apScale = [10, 15, 25]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def performAbility(self, opponents, items, time):
+        # he can only hold 2 axes, but this doesnt rly matter
+        if self.axes < 2:
+            self.axes += 1     
 
 class Maddie(Champion):
     def __init__(self, level):
@@ -490,6 +552,34 @@ class Maddie(Champion):
         for n in range(6):
             self.multiTargetSpell(opponents, items,
                     time, 1, self.abilityScaling, 'physical', 2)
+
+class Ezreal(Champion):
+    def __init__(self, level):
+        hp= 700
+        atk = 60
+        curMana = 0
+        fullMana = 60
+        aspd = .75
+        armor = 25
+        mr = 25
+        super().__init__('Ezreal', hp, atk, curMana, fullMana, aspd, armor, mr, level)
+        self.default_traits = ['Rebel', 'Artillerist']
+        self.castTime = 1.5
+        self.num_targets = 2
+
+    def abilityScaling(self, level, AD, AP):
+        adScale = [1.35, 1.35, 1.35]
+        apScale = [20, 30, 50]
+        return apScale[level - 1] * AP + adScale[level - 1] * AD
+
+    def secondaryAbilityScaling(self, level, AD, AP):
+        return .7 * self.abilityScaling(level, AD, AP)
+
+    def performAbility(self, opponents, items, time):
+        self.multiTargetSpell(opponents, items,
+                time, self.num_targets, self.abilityScaling, 'physical', 1)
+        self.multiTargetSpell(opponents, items,
+                time, 1, self.secondaryAbilityScaling, 'physical', 1)
 
 class Renata(Champion):
     def __init__(self, level):
@@ -694,7 +784,7 @@ class Twitch(Champion):
 class Zeri(Champion):
     def __init__(self, level):
         hp= 600
-        atk = 45    
+        atk = 48    
         curMana = 0
         fullMana = -1
         aspd = .75

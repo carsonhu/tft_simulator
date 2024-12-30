@@ -350,6 +350,10 @@ class Champion(object):
 
         avgDmg = self.damage(avgDmg, dtype, opponent)
         
+        for item in items:
+            # if you need to track how much dmg was actually dealt
+            item.ability("PostOnDealDamage", time, self, avgDmg)
+
         if avgDmg:
             # record (Time, Damage Dealt, current AS, current Mana)
             self.dmgVector.append((time, avgDmg, self.aspd.stat, self.curMana))

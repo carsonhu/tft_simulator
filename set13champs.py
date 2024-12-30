@@ -134,7 +134,7 @@ class Mel(Champion):
 
     def unleashAbilityScaling(self, level, AD, AP):
         apScale = [1390, 3475, 99999]
-        shieldScaling [300, 600, 10000]
+        shieldScaling = [300, 600, 10000]
         shield_bonus = (shieldScaling[level-1] * 3) * 2 * self.shield_power
         # 3 allies, 2 casts
         return apScale[level - 1] * AP + shield_bonus
@@ -620,10 +620,9 @@ class Kogmaw(Champion):
         armor = 25
         mr = 25
         super().__init__('Kogmaw', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        self.default_traits = ['Sniper']
+        self.default_traits = ['Automata', 'Sniper']
         self.castTime = 0
         self.items = [buffs.KogUlt()]
-        self.notes = "Automata will be coded in later"
 
     def abilityScaling(self, level, AD, AP):
         apScale = [48, 72, 120]

@@ -27,7 +27,7 @@ class_buffs = ['Sorcerer', 'FormSwapper', 'Family', 'Visionary', 'Sniper',
                'Quickstriker', 'Dominator', 'Ambusher', 'Rebel',
                'Conquerer', 'EmissaryNami', 'EmissaryTrist',
                'PitFighter', 'ExperimentTwitch', 'Enforcer',
-               'BanishedMage', 'Artillerist']
+               'BanishedMage', 'Artillerist', 'Automata']
 
 augments = ['ClockworkAccelerator', 'ManaflowI', 'ManaflowII', 'Shred30',
             'BlazingSoulI', 'BlazingSoulII', 'BadLuckProtection',
@@ -293,6 +293,28 @@ class Dominator(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.ap.addStat(self.scaling[self.level] * champion.fullMana.stat)
+        return 0
+
+class Automata(Buff):
+    levels = [0, 2, 4, 6]
+    def __init__(self, level, params):
+        super().__init__("Automata " + str(level), level, params,
+                         phases=["PostOnDealDamage"])
+        self.scaling = {0: 0, 2: 150, 4: 400, 6: 1100}
+        self.current_crystals = 0
+        self.stored_damage = 0
+        self.max_crystals = 20
+        self.base_pct = .25
+    def performAbility(self, phase, time, champion, input_=0):
+        # input_: (dmg, dtype)
+        if self.current_crystals < 20:
+            self.current_crystals += 1
+            self.stored_damage += input_[0]
+        if self.current_crystals >= 20:
+            baseDmg = self.stored_damage * self.base_pct + self.scaling[self.level]
+            champion.doDamage(champion.opponents[0], [], 0, baseDmg, baseDmg,'magical', time)
+            self.current_crystals = 0
+            self.stored_damage = 0
         return 0
 
 class Ambusher(Buff):

@@ -90,7 +90,7 @@ class Sorcerer(Buff):
         super().__init__("Sorcerer " + str(level), level, params,
                          phases=["preCombat"])
         self.base_scaling = 10
-        self.scaling = {2: 20, 4: 50, 6: 95, 8: 125}
+        self.scaling = {2: 20, 4: 55, 6: 105, 8: 150}
     def performAbility(self, phase, time, champion, input_=0):
         champion.ap.addStat(self.base_scaling)
         champion.ap.addStat(self.scaling[self.level])
@@ -227,6 +227,7 @@ class TwitchUlt(Buff):
     levels = [1]
     def __init__(self, level=1, params=0):
         super().__init__("Spray and Pray", level, params, phases=["preAttack"])
+
     def performAbility(self, phase, time, champion, input_=0):
         # input is attack
         if champion.ultActive and champion.ultAutos > 0:
@@ -237,8 +238,10 @@ class TwitchUlt(Buff):
             champion.ultAutos -= 1
             # just call doattack
 
-            for index in range(champion.num_targets - 1):
-                newAttack = copy.deepcopy(input_)
+            # 
+            #
+            newAttack = copy.deepcopy(input_)
+            for index in range(champion.num_targets - 1):                
                 newAttack.scaling = lambda x, y, z: .6**(index+1) * champion.abilityScaling(x, y, z)
                 champion.doAttack(newAttack, champion.items, time)
 
@@ -300,7 +303,7 @@ class Automata(Buff):
     def __init__(self, level, params):
         super().__init__("Automata " + str(level), level, params,
                          phases=["PostOnDealDamage"])
-        self.scaling = {0: 0, 2: 150, 4: 400, 6: 1100}
+        self.scaling = {0: 0, 2: 150, 4: 400, 6: 1200}
         self.current_crystals = 0
         self.stored_damage = 0
         self.max_crystals = 20
@@ -336,7 +339,7 @@ class Artillerist(Buff):
         # params is number of targets
         super().__init__("Artillerist " + str(level), level, params,
                          phases=["preCombat", "preAttack"])
-        self.attacks_until_rocket = {0: 0, 2: 5, 4: 5, 6: 4}
+        self.attacks_until_rocket = {0: 0, 2: 5, 4: 5, 6: 3}
         self.rocket_scaling = {0: 0, 2: 1.25, 4: 1.25, 6: 1.25}
         self.ad_scaling = {0:0, 2: 10, 4: 45, 6: 70}
         self.num_targets = 0
@@ -1056,7 +1059,7 @@ class FlurryOfBlows(Buff):
 
     def performAbility(self, phase, time, champion, input_=0):
         champion.aspd.addStat(30)
-        champion.crit.addStat(.35)
+        champion.crit.addStat(.45)
         return 0
 
 class GlassCannonI(Buff):
@@ -1114,8 +1117,8 @@ class CalculatedEnhancement(Buff):
         # chakram[0]: number of chakrams
         # chakram[1]: time to end
     def performAbility(self, phase, time, champion, input_=0):
-        champion.atk.addStat(35)
-        champion.ap.addStat(40)
+        champion.atk.addStat(40)
+        champion.ap.addStat(50)
         return 0
 
 class BlazingSoulI(Buff):

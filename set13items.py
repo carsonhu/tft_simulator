@@ -13,7 +13,7 @@ artifacts = ['InfinityForce', 'Fishbones', 'RFC', 'Mittens', 'GamblersBlade',
              'WitsEndStage5', 'WitsEndStage6', 'LichBaneStage2',
              'LichBaneStage3', 'LichBaneStage4', 'LichBaneStage5',
              'LichBaneStage6', 'UnleashedToxinsI',
-             'UnleashedToxinsII', 'GoldCollector'
+             'UnleashedToxinsII', 'GoldCollector', 'UnleashedToxinsIII'
              ]
 
 radiants = ['RadiantGuardbreaker', 'RadiantShiv', 'RadiantBlue',
@@ -230,7 +230,7 @@ class RunaansHurricane(Item):
         super().__init__("Runaan's Hurricane", aspd=10, ad=25, has_radiant=True, phases="preAttack")
 
     def performAbility(self, phase, time, champion, input_=0):
-        baseDmg = champion.atk.stat * .55
+        baseDmg = champion.atk.stat * .6
         if len(champion.opponents) > 1:
             champion.doDamage(champion.opponents[1], [], 0, baseDmg, baseDmg,'physical', time)
         return 0
@@ -240,7 +240,7 @@ class Deathblade(Item):
         super().__init__("Deathblade", ad=55, has_radiant=True, phases="preCombat")
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.dmgMultiplier.add += .08
+        champion.dmgMultiplier.add += .1
         return 0
 
 class QSS(Item):
@@ -357,14 +357,14 @@ class InfinityForce(Item):
 
 class Fishbones(Item):
     def __init__(self):
-        super().__init__("Fishbones", aspd=40, ad=40, phases=None)
+        super().__init__("Fishbones", aspd=50, ad=20, phases=None)
 
     def performAbility(self, phase, time, champion, input_):
         return 0
 
 class RFC(Item):
     def __init__(self):
-        super().__init__("Rapid Firecannon", aspd=75, phases=None)
+        super().__init__("Rapid Firecannon", aspd=66, phases=None)
 
     def performAbility(self, phase, time, champion, input_):
         return 0
@@ -378,14 +378,14 @@ class Mittens(Item):
 
 class GamblersBlade(Item):
     def __init__(self):
-        super().__init__("Gambler's Blade (30g)", aspd=75, ap=10, phases=None)
+        super().__init__("Gambler's Blade (30g)", aspd=65, ap=10, phases=None)
 
     def performAbility(self, phase, time, champion, input_):
         return 0
 
 class GoldCollector(Item):
     def __init__(self):
-        super().__init__("Gold Collector", ad=30, crit=30, phases=None)
+        super().__init__("Gold Collector", ad=25, crit=30, phases=None)
 
     def performAbility(self, phase, time, champion, input_):
         return 0
@@ -420,14 +420,14 @@ class UnleashedToxinsII(Item):
 
 class UnleashedToxinsIII(Item):
     def __init__(self):
-        super().__init__("Unleashed ToxinsIII", ap=45, mana=30, phases=["preAbility", "preCombat"])
-        self.dmg = 175
+        super().__init__("Unleashed ToxinsIII", ap=30, mana=30, phases=["preAbility", "preCombat"])
+        self.dmg = 250
         self.missiles = 5
-        self.bonus_dmg = 450
+        self.bonus_dmg = 150
 
     def performAbility(self, phase, time, champion, input_=0):
             if phase == "preCombat":
-                champion.manaPerAttack.addStat(5)
+                champion.manaPerAttack.addStat(10)
             elif phase == "preAbility":
                 champion.doDamage(champion.opponents[0], [], 0, self.dmg * self.missiles,
                                   self.dmg * self.missiles, 'magical', time)

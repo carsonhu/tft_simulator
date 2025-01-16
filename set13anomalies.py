@@ -102,7 +102,7 @@ class Repulsor(Buff):
     def __init__(self, level, params):
         super().__init__("Repulsor", level, params,
                          phases=["preCombat"])
-        self.scaling = 35
+        self.scaling = 40
     def performAbility(self, phase, time, champion, input_=0):
         champion.aspd.addStat(self.scaling)
         return 0
@@ -131,6 +131,19 @@ class Hypervelocity(Buff):
             champion.aspd.addStat(self.base_scaling)
         elif phase == "preAbility":
             champion.aspd.addStat(self.scaling)
+        return 0
+
+class MiniMees(Buff):
+    levels = [1]
+    def __init__(self, level, params):
+        # params is number of stacks
+        super().__init__("Mini Mees (no armor shred)", level, params,
+                         phases=["preAttack"])
+        self.scaling = .3 * 3
+    def performAbility(self, phase, time, champion, input_=0):
+        if champion.numAttacks % 2 == 0:
+            dmg = self.scaling * champion.atk.stat
+            champion.doDamage(champion.opponents[0], [], 0, dmg, dmg, 'physical', time)
         return 0
 
 class StrengthTraining(Buff):
@@ -215,18 +228,25 @@ class TitanicStrikes(Buff):
                 champion.doDamage(champion.opponents[0], [], 0, base_dmg, base_dmg, 'physical', time)
             return 0
 
-# class WolfFamiliars(Buff):
-#     levels = [1]
-#     def __init__(self, level, params):
-#         # params is number of stacks
-#         super().__init__("Wolf Familiars", level, params,
-#                          phases=["onUpdate"])
-#         self.wolf_ad = 45
-#         self.wolf_as = .9
-#         self.wolf_crit = .25
-#         self_wolf_crit_dmg = 1.4
-#     def performAbility(self, phase, time, champion, input_=0):
-#         if time > self.nextBonus:
-#             champion.atk.addStat(self.scaling)
-#             self.nextBonus += 2
-#         return 0
+class WolfFamiliars(Buff):
+    levels = [1]
+    def __init__(self, level, params):
+        # params is number of stacks
+        super().__init__("Wolf Familiars", level, params,
+                         phases=["postPreCombat", "onUpdate"])
+        self.wolf_ad = .65
+        self.wolf_as = .9
+        self.wolf_crit = .25
+        self.wolf_crit_dmg = 1.4
+        self.next_wolf_auto = 0
+    def performAbility(self, phase, time, champion, input_=0):
+        if phase == "postPreCombat":
+            self.wolf_ad = self.wolf_ad * champion.atk.stat
+        elif phase == "onUpdate":
+            if time > self.next_wolf_auto:
+                crit_dmg = self.wolf_ad * self.wolf_crit_dmg
+                champion.doDamage(champion.opponents[0], [],
+                                  self.wolf_crit, crit_dmg * 2,
+                                  self.wolf_ad * 2, 'physical', time)
+                self.next_wolf_auto += 1 / self.wolf_as
+        return 0

@@ -642,13 +642,13 @@ class Morgana(Champion):
         mr = 20
         super().__init__('Morgana', hp, atk, curMana, fullMana, aspd, armor, mr, level)
         self.default_traits = ['Visionary']
-        self.castTime = 0.5
+        self.castTime = 1
         self.notes = "Damage is instant here; sims on morg will be \
                       misleading since her targets will die before \
                       she gets full DoT value anyways."
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [525, 780, 1300]
+        apScale = [530, 800, 1500]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -720,10 +720,10 @@ class Silco(Champion):
 class Powder(Champion):
     def __init__(self, level):
         hp= 500
-        atk = 35
+        atk = 30
         curMana = 40
         fullMana = 120
-        aspd = .7
+        aspd = .75
         armor = 15
         mr = 15
         super().__init__('Powder', hp, atk, curMana, fullMana, aspd, armor, mr, level)
@@ -761,7 +761,7 @@ class Twitch(Champion):
 
         # ultAmped: for dragon
         self.ultAutos = 0
-        self.aspd_bonus = 85
+        self.aspd_bonus = 75
         self.castTime = 0
         self.ultActive = False
         self.manalockDuration = 15 # idk what it is

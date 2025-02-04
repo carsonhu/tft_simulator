@@ -115,7 +115,7 @@ class HoJ(Item):
 
 class TacticiansCrown(Item):
     def __init__(self):
-        super().__init__("Tacticians' Crown (Coronation)", aspd=30, ad=30, ap=40, phases=None)
+        super().__init__("Tacticians' Crown (Coronation)", aspd=25, ad=25, ap=35, phases=None)
 
     def performAbility(self, phase, time, champion, input_=0):
         return 0
@@ -339,6 +339,7 @@ class Blue(Item):
     def performAbility(self, phase, time, champion, input_=0):
         # blue buff is the only multiplier so we just to flat -10
         if phase == "postAbility":
+            # if time > champion.manalockTime:
             champion.addMana(10)
             # champion.fullMana.add = -10
             # champion.curMana = min(champion.curMana, champion.fullMana.stat)
@@ -549,7 +550,7 @@ class RadiantShiv(Item):
 
 class RadiantBlue(Item):
     def __init__(self):
-        super().__init__("Radiant Blue", mana=60, ap=50, ad=50, phases=["postAbility", "onUpdate"])
+        super().__init__("Radiant Blue", mana=30, ap=60, ad=60, phases=["postAbility", "onUpdate"])
         self.has_activated = False
     
     def performAbility(self, phase, time, champion, input_=0):
@@ -565,7 +566,7 @@ class RadiantBlue(Item):
 
 class RadiantArchangels(Item):
     def __init__(self):
-        super().__init__("Radiant Archangels", mana=15, ap=50, phases=["onUpdate"])
+        super().__init__("Radiant Archangels", mana=15, ap=60, phases=["onUpdate"])
         self.nextAP = 4
 
     def performAbility(self, phase, time, champion, input_=0):
@@ -576,7 +577,7 @@ class RadiantArchangels(Item):
 
 class RadiantRunaansHurricane(Item):
     def __init__(self):
-        super().__init__("Radiant Runaan's", aspd=20, ad=35, phases="preAttack")
+        super().__init__("Radiant Runaan's", aspd=20, ad=50, phases="preAttack")
 
     def performAbility(self, phase, time, champion, input_=0):
         baseDmg = champion.atk.stat * 1.1
@@ -624,7 +625,7 @@ class RadiantGS(Item):
 
 class RadiantRabadons(Item):
     def __init__(self):
-        super().__init__("Radiant Rab", ap=70, phases="preCombat")
+        super().__init__("Radiant Rab", ap=80, phases="preCombat")
     def performAbility(self, phase, time, champion, input_):
         # input_ is target
         champion.dmgMultiplier.add += .5
@@ -632,7 +633,7 @@ class RadiantRabadons(Item):
 
 class RadiantJeweledGauntlet(Item):
     def __init__(self):
-        super().__init__("Radiant JG", crit=75, ap=55, phases=["postPreCombat"])
+        super().__init__("Radiant JG", crit=75, ap=70, phases=["postPreCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
         if champion.canSpellCrit:
@@ -675,7 +676,7 @@ class RadiantShojin(Item):
 
 class RadiantInfinityEdge(Item):
     def __init__(self):
-        super().__init__("Radiant InfinityEdge", ad=65, crit=75, phases=["postPreCombat"])
+        super().__init__("Radiant InfinityEdge", ad=70, crit=75, phases=["postPreCombat"])
 
     def performAbility(self, phase, time, champion, input_=0):
         if champion.canSpellCrit:
@@ -688,7 +689,7 @@ class RadiantDeathblade(Item):
         super().__init__("Radiant DB", ad=105, phases="preCombat")
 
     def performAbility(self, phase, time, champion, input_=0):
-        champion.dmgMultiplier.add += .12
+        champion.dmgMultiplier.add += .2
         return 0
 
 class RadiantQSS(Item):

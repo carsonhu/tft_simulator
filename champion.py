@@ -65,7 +65,7 @@ class AP(Stat):
 
 class Attack(object):
     # stores details on an attack
-    def __init__(self, opponents, scaling=lambda level, AD, AP=0: AD, canCrit=True,
+    def __init__(self, opponents=None, scaling=lambda level, AD, AP=0: AD, canCrit=True,
                  canOnHit=True, multiplier=Stat(0, 1, 0),
                  attackType='physical', numTargets=1, regularAuto=True):
         self.opponents = opponents
@@ -270,7 +270,7 @@ class Champion(object):
                 item.ability("preAbility", time, self)
             self.performAbility(opponents, items, time)
             # set manalock
-            if time < .5:
+            if time < -1: # this line doesn't do what it should
                 # if they instant cast they shouldn't be manalocked
                 self.manalockTime = 0
             else:

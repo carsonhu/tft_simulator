@@ -27,6 +27,17 @@ class Bully(Buff):
         champion.dmgMultiplier.add += self.scaling
         return 0
 
+class Hivemind(Buff):
+    levels = [1]
+    def __init__(self, level, params):
+        # params is number of stacks
+        super().__init__("Hivemind", level, params,
+                         phases=["preCombat"])
+        self.scaling = .25
+    def performAbility(self, phase, time, champion, input_=0):
+        champion.dmgMultiplier.add += self.scaling
+        return 0
+
 # class CosmicRhythm(Buff):
 #     levels = [1]
 #     def __init__(self, level, params):
@@ -115,6 +126,7 @@ class CullTheWeak(Buff):
                          phases=["preCombat"])
         self.scaling = .5
     def performAbility(self, phase, time, champion, input_=0):
+        champion.canSpellCrit = True
         champion.crit.addStat(self.scaling)
         return 0
 
@@ -218,7 +230,7 @@ class TitanicStrikes(Buff):
         # params is number of stacks
         super().__init__("Titanic Strikes (2 targets)", level, params,
                          phases=["preAttack"])
-        self.scaling = .40
+        self.scaling = .50
     def performAbility(self, phase, time, champion, input_=0):
         if input_.regularAuto:
             # shouldn't proc on spells
@@ -234,7 +246,7 @@ class WolfFamiliars(Buff):
         # params is number of stacks
         super().__init__("Wolf Familiars", level, params,
                          phases=["postPreCombat", "onUpdate"])
-        self.wolf_ad = .65
+        self.wolf_ad = .75
         self.wolf_as = .9
         self.wolf_crit = .25
         self.wolf_crit_dmg = 1.4

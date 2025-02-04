@@ -84,13 +84,13 @@ class NoBuff(Buff):
         return 0
 
 class Sorcerer(Buff):
-    levels = [0, 2, 4, 6, 8]
+    levels = [0, 2, 4, 6]
     def __init__(self, level, params):
         # params is number of stacks
         super().__init__("Sorcerer " + str(level), level, params,
                          phases=["preCombat"])
         self.base_scaling = 10
-        self.scaling = {2: 20, 4: 55, 6: 105, 8: 150}
+        self.scaling = {2: 20, 4: 55, 6: 90}
     def performAbility(self, phase, time, champion, input_=0):
         champion.ap.addStat(self.base_scaling)
         champion.ap.addStat(self.scaling[self.level])
@@ -127,11 +127,11 @@ class ExperimentTwitch(Buff):
         return 0
 
 class Visionary(Buff):
-    levels = [0, 2, 4, 6, 8]
+    levels = [0, 2, 4, 6]
     def __init__(self, level, params):
         super().__init__("Visionary " + str(level), level, params,
                          phases=["preCombat"])
-        self.scaling = {2: .25, 4: .5, 6: .8, 8: 1}
+        self.scaling = {2: .25, 4: .5, 6: .8}
     def performAbility(self, phase, time, champion, input_=0):
         champion.manaGainMultiplier.mult += self.scaling[self.level]
         return 0
@@ -227,6 +227,7 @@ class TwitchUlt(Buff):
     levels = [1]
     def __init__(self, level=1, params=0):
         super().__init__("Spray and Pray", level, params, phases=["preAttack"])
+        # self.newAttack = Attack()
 
     def performAbility(self, phase, time, champion, input_=0):
         # input is attack
@@ -240,7 +241,14 @@ class TwitchUlt(Buff):
 
             # 
             #
-            newAttack = copy.deepcopy(input_)
+            newAttack = Attack(opponents=champion.opponents,
+                               canCrit=champion.canSpellCrit,
+                               canOnHit=True,
+                               numTargets=1)
+            # self.newAttack.opponents = champion.opponents
+            # self.newAttack.canCrit = champion.canSpellCrit
+            # self.newAttack.canOnHit = True
+            # self.newAttack.numTargets = 1
             for index in range(champion.num_targets - 1):                
                 newAttack.scaling = lambda x, y, z: .6**(index+1) * champion.abilityScaling(x, y, z)
                 champion.doAttack(newAttack, champion.items, time)
@@ -1145,8 +1153,8 @@ class BlazingSoulII(Buff):
         # chakram[0]: number of chakrams
         # chakram[1]: time to end
     def performAbility(self, phase, time, champion, input_=0):
-        champion.aspd.addStat(30)
-        champion.ap.addStat(35)
+        champion.aspd.addStat(35)
+        champion.ap.addStat(45)
         return 0
 
 class BadLuckProtection(Buff):

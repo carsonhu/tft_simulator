@@ -78,10 +78,11 @@ class Attack(object):
         self.regularAuto = regularAuto
 
 class Champion(object):
+    canFourStar = False
     def __init__(self, name, hp, atk, curMana, fullMana, aspd, armor, mr, level):
         self.name = name
-        levels = [1, 1.5, 1.5**2, 1.5**3]
-        hp_levels = [1, 1.8, 1.8**2, 1.8**3]
+        levels = [1, 1.5, 1.5**2, 1.5**3, 1.5**4]
+        hp_levels = [1, 1.8, 1.8**2, 1.8**3, 1.8**4]
         self.hp = Stat(hp * hp_levels[level - 1], 1, 0)
         self.atk = AD(atk * levels[level - 1], 1, 0)
         self.curMana = curMana
@@ -121,6 +122,7 @@ class Champion(object):
         self.first_takedown = 5 # time of first takedown
         self.num_traits = 0 
         self.rebel_time = 5 # time of rebel proc
+        self.categoryFive = False
         
         self.num_targets = 0
 
@@ -149,6 +151,7 @@ class Champion(object):
                      self.first_takedown,
                      self.num_traits,
                      self.rebel_time,
+                     self.categoryFive,
                      self.num_targets)
         return (items_tuple + stat_tuple)
         
@@ -298,11 +301,6 @@ class Champion(object):
         if attack.canOnHit:
             for item in items:
                 item.ability("onAttack", time, self, attack.opponents)
-
-        # onCrit is currently unused
-        if attack.canCrit:
-            for item in items:
-                item.ability("onCrit", time, self, attack.opponents)
                 
         baseDmg = self.baseAtkDamage(attack.scaling(self.level, self.atk.stat,
                                      self.ap.stat), attack.multiplier)

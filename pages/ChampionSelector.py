@@ -122,6 +122,9 @@ simLists = set13_streamlit_snipers.doExperimentOneExtra(champ, enemy,
 
 tab1, tab2 = st.tabs(["Items", "Radiant Refractor"])
 
+with tab2:
+    st.write("TODO: add radiant refractor table")
+
 with tab1:
     # Header
     st.header("{} {} vs {} HP, {} Armor, {} MR".format(champ_before_sims.name, champ_before_sims.level,

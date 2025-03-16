@@ -315,7 +315,11 @@ class ArmorReduction(Status):
             # if it's weaker, doesnt work
             return False
     def wearoffEffect(self, champion, time):
+        # iterate through champ statuses
         champion.armor.mult = 1
+        for status_name, status in champion.statuses.items():
+            if 'Armor Reduction' in status_name and status.active:
+                champion.armor.mult = min(champion.armor.mult, status.reduction)
         return True
 
 class MRReduction(Status):
@@ -338,4 +342,7 @@ class MRReduction(Status):
             return False
     def wearoffEffect(self, champion, time):
         champion.mr.mult = 1
+        for status_name, status in champion.statuses.items():
+            if 'MR Reduction' in status_name and status.active and status_name != self.name:
+                champion.mr.mult = min(champion.armor.mult, status.reduction)
         return True

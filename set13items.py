@@ -13,15 +13,15 @@ artifacts = ['InfinityForce', 'Fishbones', 'RFC', 'Mittens', 'GamblersBlade',
              'WitsEndStage5', 'WitsEndStage6', 'LichBaneStage2',
              'LichBaneStage3', 'LichBaneStage4', 'LichBaneStage5',
              'LichBaneStage6', 'UnleashedToxinsI',
-             'UnleashedToxinsII', 'GoldCollector', 'UnleashedToxinsIII'
-             ]
+             'UnleashedToxinsII', 'GoldCollector']
 
 radiants = ['RadiantGuardbreaker', 'RadiantShiv', 'RadiantBlue',
             'RadiantArchangels', 'RadiantRunaansHurricane', 'RadiantGuinsoosRageblade',
             'RadiantLastWhisper', 'RadiantGS', 'RadiantRabadons', 'RadiantJeweledGauntlet',
             'RadiantNashors', 'RadiantShojin', 'RadiantInfinityEdge',
             'RadiantDeathblade', 'RadiantTitans',
-            'RadiantHoJ', 'RadiantRed', 'RadiantMorellos', 'RadiantQSS']
+            'RadiantHoJ', 'RadiantRed', 'RadiantMorellos', 'RadiantQSS',
+            'RadiantAdaptive']
 
 no_item = ['NoItem']
 
@@ -72,11 +72,11 @@ class Rabadons(Item):
 
 class Bloodthirster(Item):
     def __init__(self):
-        super().__init__("Bloodthirster", ad=20, ap=20, phases=None)
+        super().__init__("Bloodthirster", ad=15, ap=15, phases=None)
 
 class HextechGunblade(Item):
     def __init__(self):
-        super().__init__("Gunblade", ad=15, ap=15, phases=None)
+        super().__init__("Gunblade", ad=20, ap=20, phases=None)
 
 class GuinsoosRageblade(Item):
     def __init__(self):
@@ -108,7 +108,7 @@ class Warmogs(Item):
 
 class HoJ(Item):
     def __init__(self):
-        super().__init__("Hand of Justice", mana=10, crit=20, ad=30, ap=30, has_radiant=True, phases=None)
+        super().__init__("Hand of Justice", mana=10, crit=20, ad=24, ap=24, has_radiant=True, phases=None)
 
     def performAbility(self, phase, time, champion, input_=0):
         return 0
@@ -233,6 +233,9 @@ class RunaansHurricane(Item):
         baseDmg = champion.atk.stat * .6
         if len(champion.opponents) > 1:
             champion.doDamage(champion.opponents[1], [], 0, baseDmg, baseDmg,'physical', time)
+            if champion.categoryFive:
+                champion.doDamage(champion.opponents[1], [], 0, baseDmg * .85, baseDmg * .85, 'physical', time)              
+
         return 0
 
 class Deathblade(Item):

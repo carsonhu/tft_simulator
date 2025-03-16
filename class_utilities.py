@@ -378,9 +378,12 @@ def champ_selector(champ_list):
     'Champion',
      champ_list)
   with item_cols[1]:
+    levels = [1, 2, 3]
+    if utils.class_for_name('set13champs', champ).canFourStar:
+      levels.append(4)
     champlevel = st.selectbox(
     'Level',
-     [1, 2, 3], index=1)
+     levels, index=1)
 
     
 

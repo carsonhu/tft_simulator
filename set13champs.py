@@ -14,8 +14,8 @@ champ_list = ['Cassiopeia', 'Kogmaw', 'Lux', 'Maddie', 'Morgana', 'Powder', 'Sil
 
 class Lux(Champion):
     def __init__(self, level):
-        hp= 500
-        atk = 35    
+        hp = 500
+        atk = 35
         curMana = 15
         fullMana = 75
         aspd = .7
@@ -48,14 +48,15 @@ class Vex(Champion):
         self.default_traits = ['Rebel', 'Visionary']
         self.castTime = 1
         self.num_targets = 2
+        self.canFourStar = True
         self.notes = "Damage is instant"
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [220, 330, 550]
+        apScale = [240, 360, 580, 800]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
-        apScale = [110, 165, 250]
+        apScale = [120, 180, 290, 400]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -95,7 +96,7 @@ class Swain(Champion):
         armor = 25
         mr = 25
         super().__init__('Swain', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        self.default_traits = ['Conquerer', 'FormSwapper', 'Sorcerer']
+        self.default_traits = ['Conqueror', 'FormSwapper', 'Sorcerer']
         self.castTime = 1.5
 
     def abilityScaling(self, level, AD, AP):
@@ -103,7 +104,7 @@ class Swain(Champion):
         return apScale[level - 1] * AP
 
     def secondaryAbilityScaling(self, level, AD, AP):
-        apScale = [40, 60, 90]
+        apScale = [38, 57, 90]
         return apScale[level - 1] * AP * 8
 
     def performAbility(self, opponents, items, time):
@@ -221,15 +222,15 @@ class Leblanc(Champion):
         self.manalockDuration = 15 # idk what it is
         self.items = [buffs.LeblancUlt()]
         self.notes = "Ult is simplified: hits 1 \
-                      target and deals .25 extra true dmg. Won't exactly model her \
+                      target and deals .2 extra true dmg. Won't exactly model her \
                       ingame behavior, but should provide good insight into item performance on her."
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [650, 975, 5000]
+        apScale = [590, 888, 5000]
         return apScale[level - 1] * AP
 
     def autoAbilityScaling(self, level, AD, AP):
-        apScale = [160, 240, 900]
+        apScale = [150, 225, 900]
         return apScale[level - 1] * AP
 
 
@@ -237,7 +238,7 @@ class Leblanc(Champion):
         self.multiTargetSpell(opponents, items,
                 time, 1, self.abilityScaling, 'magical')
         self.multiTargetSpell(opponents, items,
-                time, 1, lambda x, y, z: self.abilityScaling(x, y, z) * .25, 'true')
+                time, 1, lambda x, y, z: self.abilityScaling(x, y, z) * .2, 'true')
         self.ultActive = True
         self.ultAutos = 3
 
@@ -257,7 +258,7 @@ class Malzahar(Champion):
         self.castTime = .5
         self.num_targets = 5
         self.buff_duration = 999
-        self.notes = "No shred yet / automata yet"
+        self.notes = "No automata yet"
 
     def abilityScaling(self, level, AD, AP):
         apScale = [100, 150, 1000]
@@ -273,6 +274,10 @@ class Malzahar(Champion):
 
         opponents[0].applyStatus(status.DoTEffect("Malz {}".format(self.numCasts)),
             self, time, self.buff_duration, self.dotScaling)
+
+        for opponent in opponents[0:self.num_targets]:
+            opponent.applyStatus(status.MRReduction("MR Malz"), self, time, 4, .8)
+
 
 class Vladimir(Champion):
     def __init__(self, level):
@@ -291,7 +296,7 @@ class Vladimir(Champion):
 
     def abilityScaling(self, level, AD, AP):
         apScale = [140, 210, 325]
-        return apScale[level - 1] * AP * 1.7
+        return apScale[level - 1] * AP * 1.8
 
     def extraAbilityScaling(self, level, AD, AP):
         apScale = [90, 135, 205]
@@ -305,6 +310,7 @@ class Vladimir(Champion):
                 time, 1, self.extraAbilityScaling, 'magical')
 
 class Zyra(Champion):
+    canFourStar = True
     def __init__(self, level):
         hp= 500
         atk = 30
@@ -316,14 +322,16 @@ class Zyra(Champion):
         super().__init__('Zyra', hp, atk, curMana, fullMana, aspd, armor, mr, level)
         self.default_traits = ['Sorcerer']
         self.castTime = 1
-        self.notes = "No Zyra Experiment bonus yet"
+        self.canFourStar = True
+        self.notes = "No Zyra Experiment bonus included; it's a raw 50% multiplier if u get full 2 second burn."
+
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [280, 420, 630]
+        apScale = [280, 420, 630, 780]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
-        apScale = [95, 140, 215]
+        apScale = [95, 140, 215, 290]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -352,7 +360,7 @@ class Heimerdinger(Champion):
         self.notes = "Cast time set to increase by .09 with every missile."
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [50, 75, 225]
+        apScale = [52, 78, 275]
         return apScale[level - 1] * AP * self.missiles
 
     def performAbility(self, opponents, items, time):
@@ -433,11 +441,11 @@ class Cassiopeia(Champion):
         # technically her next auto is amped but it's literally the same thing
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [230, 345, 550]
+        apScale = [230, 360, 580]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
-        apScale = [160, 245, 385]
+        apScale = [220, 330, 530]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -473,7 +481,7 @@ class Tristana(Champion):
 class Corki(Champion):
     def __init__(self, level):
         hp= 850
-        atk = 65
+        atk = 70
         curMana = 0
         fullMana = 60
         aspd = .75
@@ -514,14 +522,14 @@ class Draven(Champion):
         armor = 15
         mr = 15
         super().__init__('Draven', hp, atk, curMana, fullMana, aspd, armor, mr, level)
-        self.default_traits = ['Conquerer', 'PitFighter']
+        self.default_traits = ['Conqueror', 'PitFighter']
         self.castTime = 0
         self.axes = 0
         self.items = [buffs.DravenUlt()]
         self.notes = "1.5 second return time."
 
     def abilityScaling(self, level, AD, AP):
-        adScale = [1.4, 1.4, 1.4]
+        adScale = [1.4, 1.4, 1.5]
         apScale = [10, 15, 25]
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
@@ -549,9 +557,8 @@ class Maddie(Champion):
         return apScale[level - 1] * AP + adScale[level - 1] * AD
 
     def performAbility(self, opponents, items, time):
-        for n in range(6):
-            self.multiTargetSpell(opponents, items,
-                    time, 1, self.abilityScaling, 'physical', 2)
+        self.multiTargetSpell(opponents, items,
+                    time, 6, self.abilityScaling, 'physical', 2)
 
 class Ezreal(Champion):
     def __init__(self, level):
@@ -600,7 +607,7 @@ class Renata(Champion):
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
-        apScale = [140, 210, 325]
+        apScale = [130, 195, 290]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -671,7 +678,7 @@ class Elise(Champion):
         self.num_targets = 2
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [220, 330, 1000]
+        apScale = [250, 375, 1200]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):
@@ -703,11 +710,11 @@ class Silco(Champion):
         self.notes = "Damage is instant here"
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [100, 200, 1000]
+        apScale = [140, 200, 1000]
         return apScale[level - 1] * AP
 
     def monsterAbilityScaling(self, level, AD, AP):
-        apScale = [38, 57, 100]
+        apScale = [38, 58, 100]
         return apScale[level - 1] * AP * self.num_attacks
 
     def performAbility(self, opponents, items, time):
@@ -734,7 +741,7 @@ class Powder(Champion):
         self.notes = "1 target at epicenter, 1 target 2 hexes away, the rest 1 hex away"
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [350, 500, 700]
+        apScale = [420, 550, 735]
         return apScale[level - 1] * AP
 
     def performAbility(self, opponents, items, time):
@@ -816,7 +823,7 @@ class Ziggs(Champion):
         self.castTime = .5
 
     def abilityScaling(self, level, AD, AP):
-        apScale = [180, 270, 450]
+        apScale = [180, 270, 480]
         return apScale[level - 1] * AP
 
     def extraAbilityScaling(self, level, AD, AP):

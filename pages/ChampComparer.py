@@ -32,17 +32,22 @@ simDict = {}
 #     unsafe_allow_html=True,
 # )
 
+# champ list will be a preset list
 
-champ_list = sorted(set12champs.champ_list)
+dom_list = ['Ziggs', 'Cassiopeia', 'Silco']
+
+champ_list = sorted(set13champs.champ_list)
 
 # all_items = []
-all_buffs = sorted(set12buffs.class_buffs + set12buffs.augments
-            + set12buffs.no_buff + set12buffs.stat_buffs)
+all_buffs = sorted(set13buffs.class_buffs + set13buffs.augments
+            + set13buffs.no_buff + set13buffs.stat_buffs)
 
-all_items = sorted(set12items.offensive_craftables + set12items.artifacts
-            + set12items.radiants + set12items.no_item)
+all_items = sorted(set13items.offensive_craftables + set13items.artifacts
+            + set13items.radiants + set13items.no_item)
 
-aug_buffs = sorted(set12buffs.augments)
+aug_buffs = sorted(set13buffs.augments)
+
+anomalies = sorted(set13buffs.anomalies + set13buffs.no_buff)
 
 # for name, obj in inspect.getmembers(set12items, inspect.isclass):
 #     # st.write(dir(obj))
@@ -55,6 +60,12 @@ aug_buffs = sorted(set12buffs.augments)
 #         all_buffs.append(name)
 
 champ_before_sims = None
+
+
+with st.sidebar:
+    champs = []
+    for champ_name in dom_list:
+        new_champ = class_utilities.champ_selector(champ_list)
 
 with st.sidebar:
     champ = class_utilities.champ_selector(champ_list)

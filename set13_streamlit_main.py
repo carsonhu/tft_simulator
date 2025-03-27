@@ -16,25 +16,16 @@ import streamlit as st
 import pandas as pd
 import utils
 
+
 class ObjectWrapper:
+    # Used for hash functions
     def __init__(self, champion):
         self.obj = champion
         self.hash = champion.__hash__()
 
-# class ObjectListWrapper:
-#     def __init__(self, object_list):
-#         self.object_list = object_list
-#         self.hash = ()
-#         for obj in object_list:
-#             self.hash += obj.hashFunction()
-#         st.write("Hash raw: ", self.hash)
-#         self.hash = hash(self.hash)
-#         st.write("Hash: ", self.hash)
-
 
 def hash_func(obj: ObjectWrapper) -> str:
-    return obj.hash  # or any other value that uniquely identifies the object
-
+    return obj.hash
 
 
 class Simulator(object):
@@ -50,6 +41,7 @@ class Simulator(object):
             item.ability("preCombat", 0, champion)
         for item in items:
             item.ability("postPreCombat", 0, champion)
+
     def simulate(self, items, buffs, champion, opponents, duration):
         # there's no real distinction between items and buffs
         # dmgVector: (Time, Damage Dealt, current AS, current Mana)
@@ -58,7 +50,7 @@ class Simulator(object):
         champion.opponents = opponents
         self.itemStats(items, champion)
         self.current_time = 0
-        
+       
         for opponent in opponents:
             opponent.nextAttackTime = duration * 2
         while self.current_time < duration:
@@ -69,37 +61,28 @@ class Simulator(object):
         return champion.dmgVector
 
     def simulateUlt(self, items, buffs, champion, opponents):
-      items = items + buffs + champion.items
-      champion.items = items
-      champion.opponents = opponents
-      self.itemStats(items, champion)
-      champion.performAbility(opponents, items, 0)
-      return champion.dmgVector
-
-
-# def plotSimulation(items, t):
-#     simulator = Simulator()
-#     results = simulator.simulate(items, [], aphelios, [aphelios], t)
-#     itemNames = ','.join([item.name for item in items])
-#     plt.plot(*zip(*results), label = itemNames)
+        items = items + buffs + champion.items
+        champion.items = items
+        champion.opponents = opponents
+        self.itemStats(items, champion)
+        champion.performAbility(opponents, items, 0)
+        return champion.dmgVector
 
 
 def resNoDmg(res, label):
-    a,b = zip(*[(result[0], result[1][0]) for result in res])
+    a, b = zip(*[(result[0], result[1][0]) for result in res])
     b = np.cumsum(b)
-    plt.plot(a,b, label=label)
+    plt.plot(a, b, label=label)
+
 
 def plotRes(res, label):
     plt.plot(res[0], res[1], label)
 
+
 def getDPS(results, time):
     dpsFunc = getDPSFunction(results)
     return dpsFunc(time) / time
-    # dpsSum = 0
-    # for result in results:
-    #     if result[0] < time:
-    #         dpsSum += result[1][0]
-    # return dpsSum / time
+
 
 def dpsSplit(results):
     dps = {"physical": 0, "magical": 0, "true": 0}
@@ -111,10 +94,12 @@ def dpsSplit(results):
     else:
         return {k: v / total for k, v in dps.items()}
 
+
 def getDPSFunction(results):
     # bug: doesnt work if last result is less than desired time
     # e.g u want dps at 20, but only have dps up to 18
     return interpolate.interp1d([a[0] for a in results], np.cumsum([a[1][0] for a in results]))
+
 
 def createDPSChart(simList):
     for sim in simList:
@@ -124,9 +109,11 @@ def createDPSChart(simList):
         print(sim[0].name, [u.name for u in sim[1]], [u.name for u in sim[2]], dps5s, dps10s, dps15s, dpsSplit(sim[3]))
         # we want DPS at 5s, DPS at 10s, DPS at 15
 
+
 def createUltDamageCSV(simLists):
     headers_arr = ["Champion", "Level", "Items", "Item 1", "Item 2", "Item 3",
-                  "Buff 1", "Buff 2", "Damage to Squishy", "Damage to Tank", "Damage to Supertank"]
+                   "Buff 1", "Buff 2", "Damage to Squishy", "Damage to Tank",
+                   "Damage to Supertank"]
     workbook = xlsxwriter.Workbook('ult_stats.xlsx')
     dpsDict = {}
     newEntryLength = 0
@@ -335,6 +322,7 @@ def createDPScsv(simLists):
                     worksheet1.write(index+1, len(new_entry)+4, round(dpsDict[mainTup] / dpsDict[tup], 2))    
     workbook.close()
 
+
 def doExperiment(champion, opponent, itemList, buffList, t):
     simulator = Simulator()
     simList = []
@@ -345,22 +333,23 @@ def doExperiment(champion, opponent, itemList, buffList, t):
             items = copy.deepcopy(itemCombo)
             buffs = copy.deepcopy(buffCombo)
             results1 = simulator.simulate(items, buffs, champ,
-                [copy.deepcopy(opponent), copy.deepcopy(opponent), copy.deepcopy(opponent), copy.deepcopy(opponent)], t)    
-            simList.append({"Champ" : champ, "Items": items, "Buffs" : buffs, "Results" : results1})
-        #resNoDmg(results1, label=item.name)
+                       [copy.deepcopy(opponent), copy.deepcopy(opponent), copy.deepcopy(opponent), copy.deepcopy(opponent)], t)    
+            simList.append({"Champ": champ, "Items": items, "Buffs" : buffs, "Results" : results1})
     print("Finished simulation on {}".format(champion.name))
     return simList
+
 
 def doExperimentGivenItems(champions, opponent, itemCombo, buffs, t):
     simulator = Simulator()
     simList = []
     for champ in champions:
-      champ = copy.deepcopy(champ)
-      results1 = simulator.simulate(copy.deepcopy(itemCombo), copy.deepcopy(buffs), champ,
-          [copy.deepcopy(opponent) for i in range(8)], t)
-      simList.append((champ, itemCombo, [buffs], results1))
+        champ = copy.deepcopy(champ)
+        results1 = simulator.simulate(copy.deepcopy(itemCombo), copy.deepcopy(buffs), champ,
+            [copy.deepcopy(opponent) for i in range(8)], t)
+        simList.append((champ, itemCombo, [buffs], results1))
     return simList
     # return simList  
+
 
 def radiantRefactor(champions, opponent, itemList, t):
     simulator = Simulator()
@@ -370,8 +359,6 @@ def radiantRefactor(champions, opponent, itemList, t):
     # to get the radiants
     return 0
 
-# def hash_func(obj: Champion) -> str:
-#     return obj.name  # or any other value that uniquely identifies the object
 
 @st.cache_data(hash_funcs={ObjectWrapper: hash_func})
 def doExperimentOneExtraWrapped(champion: ObjectWrapper, opponent: ObjectWrapper,

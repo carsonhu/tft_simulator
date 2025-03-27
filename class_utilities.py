@@ -1,6 +1,6 @@
 # This is for commonly used functions in fated/snipers
 
-import set13_streamlit_snipers
+import set13_streamlit_main
 import matplotlib.pyplot as plt
 import streamlit as st
 import set13buffs
